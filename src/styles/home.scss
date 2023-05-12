@@ -1,5 +1,4 @@
 .home-container {
-  text-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -7,36 +6,21 @@
   min-height: 100vh;
   position: relative;
 
-  .home-logo {
-    font-family: "Poppins", sans-serif;
-    font-size: .7rem;
-    text-align: left;
-    color: #041562;
-    position: absolute;
-    top: 1%;
-    left: 1%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: .2rem;
-  }
+//   .home-text_container {
+//     .home-text {
+//       font-size: 1.5rem;
+//       color: #11468f;
+//       padding: 1rem;
+//       border-radius: 0.5rem;
+//       text-decoration: none;
+//       display: block;
+//       font-weight: 700;
+//       margin: 1rem;
+//       border: 1px solid#e0e3e7;
 
-  .home-text_container {
-    .home-text {
-      font-size: 1.5rem;
-      color: #11468f;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      text-decoration: none;
-      display: block;
-      font-weight: 700;
-      margin: 1rem;
-    //   background-color: #eeeeee;
-      border: 1px solid#e0e3e7;
-
-      &:hover {
-        box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 10px 3px rgba(60,64,67,0.149);;
-      }
-    }
-  }
+//       &:hover {
+//         box-shadow: 0 1px 3px 0 rgba(60,64,67,0.302), 0 4px 10px 3px rgba(60,64,67,0.149);;
+//       }
+//     }
+//   }
 }
