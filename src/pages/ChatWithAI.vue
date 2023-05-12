@@ -1,5 +1,4 @@
 <template>
-  <div>chat with AI</div>
   <ChatRoom />
 </template>
 

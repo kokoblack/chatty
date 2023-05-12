@@ -1,0 +1,35 @@
+.shadow-text {
+  font-size: 1.3rem;
+  color: #11468f;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  display: block;
+  font-weight: 700;
+  margin: 1rem;
+  border: 1px solid#e0e3e7;
+
+  &:hover {
+    box-shadow: 0 1px 3px 0 rgba(60, 64, 67, 0.302),
+      0 4px 10px 3px rgba(60, 64, 67, 0.149);
+  }
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.not_found {
+    text-align: center;
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    box-sizing: border-box;
+    margin: 0;
+    padding: 2rem;
+
+}
