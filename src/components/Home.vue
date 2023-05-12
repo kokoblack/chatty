@@ -7,15 +7,16 @@
     </div>
 
     <div class="home-text_container">
-      <h3 class="home-text">Private chat</h3>
-      <h3 class="home-text">Group chat</h3>
-      <h3 class="home-text">Chat with AI</h3>
+      <RouterLink to="/private-chat" class="home-text">Private chat</RouterLink>
+      <RouterLink to="/group-chat" class="home-text">Group chat</RouterLink>
+      <RouterLink to="/ai-chat" class="home-text">Chat with AI</RouterLink>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import "../styles/home.scss";
+import { RouterLink } from "vue-router";
 
 
 </script>
