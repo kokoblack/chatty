@@ -23,11 +23,12 @@ const option = route.params.option === "join" ? "Join" : "Create";
   margin: 0.5rem;
   padding: 0.5rem;
   border-radius: 6px;
-  border: 1px solid #11468f;
+  border: 1px solid #e0e3e7;
   font-size: 1rem;
 
   &:focus {
-    border: 2px solid #041562;
+    border: 1px solid #11468f;
+    outline: none;
   }
 }
 
