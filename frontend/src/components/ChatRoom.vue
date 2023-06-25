@@ -1,7 +1,7 @@
 <template>
   <div class="chat_room-container">
     <div class="chat_room-header">
-      <p>user</p>
+      <p>Waiting for other user</p>
       <v-icon
         @click="menu = !menu"
         class="icon"
@@ -10,22 +10,10 @@
       ></v-icon>
     </div>
     <div @click="menu = false" class="chat_room-body">
-      <!-- <p class="test">dbhvbvvvvvvvvvvvvh</p>
-      <p class="test">dbhvbvvvvvvvvvvvvh</p>
-      <p class="test2">
-        dbhvbvvvvvvvvvvvvffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffdgffffffffffffffffnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnngfnnnnnnnnnnnnnnnnnnnnnnnh
-      </p>
-      <p class="test2">dbhvbvvvvvvvvvvvvh</p>
-      <p class="test">dbhvbvvvvvvvvvvvvh</p>
-      <p class="test">dbhvbvvvvvvvvvvvvh</p>
-      <p class="test2">dbhvbvvvvvvvvvvvvh</p>
-      <p class="test">dbhvbvvvvvvvvvvvvh</p>
-      <p class="test">dbhvbvvvvvvvvvvvvh</p>
-      <p class="test2">dbhvbvvvvvvvvvvvvh</p>
-      <p class="test">dbhvbvvvvvvvvvvvvh</p> -->
+      <input type="file" @change="file" />
       <p>{{ connect }}</p>
-      <p v-for="msg in messages" class="test">{{ msg.message }}</p>
-      <p v-for="msg in messages" class="test">{{ msg.name }}</p>
+      <p v-for="msg in messages" class="style1">{{ msg.message }}</p>
+      <!-- <p v-for="msg in messages" :class="msg.style">{{ msg.name }}</p> -->
     </div>
     <div class="chat_room-footer">
       <v-icon
@@ -54,8 +42,8 @@
     </div>
 
     <div v-if="menu" class="menu">
-      <p>Copy Link</p>
-      <p>Close Chat</p>
+      <p @click="copyText2" class="cursor-pointer">Copy chat ID</p>
+      <p @click="navigate.push('/')" class="cursor-pointer">Close Chat</p>
     </div>
 
     <VuemojiPicker
@@ -67,38 +55,90 @@
         screenWidth < 360 ? emojiStyle : { width: '100%', height: '16rem' }
       "
     />
+
+    <div class="chat_room-id" v-if="chatIDMenu">
+      <div class="copy_box">
+        <p>{{ checkCopied }}</p>
+        <v-icon
+          @click="chatIDMenu = false"
+          class="cursor-pointer"
+          name="io-close-outline"
+          scale="1"
+        ></v-icon>
+      </div>
+      <div class="id_box">
+        <p>{{ session.roomID }}</p>
+        <v-icon
+          @click="copyText"
+          class="cursor-pointer"
+          name="io-copy-outline"
+          scale="1"
+        ></v-icon>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import io from "socket.io-client";
 import { ref, onMounted, onUnmounted } from "vue";
-import { useCounterStore } from '../stores/UserStore'
-import { storeToRefs } from 'pinia'
-import { useRoute } from "vue-router";
+import { useCounterStore } from "../stores/UserStore";
+import { storeToRefs } from "pinia";
+import { useRouter, useRoute } from "vue-router";
 import { VuemojiPicker, EmojiClickEventDetail } from "vuemoji-picker";
+import axios from "axios";
 
 type Message = {
   name: string;
   message: string;
 }[];
 
-const store = useCounterStore()
-const {name} = storeToRefs(store)
+const store = useCounterStore();
+const { name, routeOption, roomID, id, admin, routeName } = storeToRefs(store);
 const messages = ref<Message>([]);
 const connect = ref("");
 const refs = ref();
 const menu = ref(false);
+const chatIDMenu = ref(false);
+const checkCopied = ref("Copy chat ID");
 const emojiMenu = ref(false);
 const height = ref("");
 const text = ref("");
 const screenWidth = ref(window.innerWidth);
+const navigate = useRouter();
 const route = useRoute();
-const roomID = route.params.room;
-console.log(roomID)
+// const style = routeOption.value === "Join" ? "style1" : "style2";
+const ID = route.params.room;
+const session = ref({
+  name : name.value,
+  routeOption: routeOption.value,
+  roomID: roomID.value,
+  id: id.value,
+  admin: admin.value,
+  routeName: routeName.value
+})
+
+if (!name.value && !sessionStorage.getItem('store')) {
+  navigate.push("/")
+}
+
+if (!name.value) {
+    const storage = JSON.parse(sessionStorage.getItem('store')!)
+    session.value = storage
+  } else {
+    sessionStorage.setItem('store', JSON.stringify(session.value))
+}
+
+session.value?.routeOption === "Create"
+  ? (chatIDMenu.value = true)
+  : (chatIDMenu.value = false);
 
 const handleResize = () => {
   screenWidth.value = window.innerWidth;
+};
+
+const file = (e: Event) => {
+  console.log((<HTMLInputElement>e.target).files);
 };
 
 onMounted(() => {
@@ -113,17 +153,54 @@ const handleEmojiClick = (details: EmojiClickEventDetail) => {
   text.value += details.unicode;
 };
 
-const socket = io("http://localhost:3000");
-socket.on("connect", () => (connect.value = `${socket.id} is connected`));
-socket.emit('join-room', roomID)
-socket.on("chat message", (msg) => messages.value.push(msg));
+const copyText = () => {
+  navigator.clipboard.writeText(session.value.roomID);
+  checkCopied.value = "Copied!";
+};
 
+const copyText2 = () => {
+  navigator.clipboard.writeText(session.value.roomID);
+  menu.value = false;
+};
+
+axios
+  .get(`http://localhost:3000/rooms/conversation/${ID}`)
+  .then((res) => (messages.value = res.data.conversation))
+  .catch((err) => console.log(err));
+
+const socket = io("http://localhost:3000");
+
+socket.emit("new user", {
+  name: session.value?.name,
+  id: session.value?.id,
+  admin: session.value?.admin,
+  roomID: session.value?.roomID
+})
+socket.on("user connected", (newUser) => {
+  connect.value = newUser
+  console.log(newUser);
+});
+socket.on("users", (users) => {
+  console.log(users);
+})
+socket.emit("join-room", ID);
+socket.on("chat message", (msg) => messages.value.push(msg));
 
 const newMsg = (e: Event) => {
   e.preventDefault();
   if (text.value) {
-    messages.value.push({ name: name.value, message: text.value })
-    socket.emit("chat message", { name: name.value, message: text.value }, roomID);
+    messages.value.push({ name: session.value?.name, message: text.value });
+    socket.emit(
+      "chat message",
+      { name: session.value?.name, message: text.value },
+      ID
+    );
+
+    axios.patch(`http://localhost:3000/rooms/conversation/${ID}`, {
+      name: session.value?.name,
+      message: text.value,
+    });
+
     text.value = "";
   }
 };
@@ -177,7 +254,20 @@ const resize = () => {
     padding: 0 0 5rem 0;
     width: 100%;
     box-sizing: border-box;
-    .test {
+    .style1 {
+      margin: 0.2rem;
+      background-color: #dedfe0;
+      color: #19191a;
+      padding: 0.5rem;
+      border-radius: 6px;
+      width: fit-content;
+      max-width: 70%;
+      margin-right: auto;
+      box-sizing: border-box;
+      word-break: break-all;
+    }
+
+    .style2 {
       margin: 0.2rem;
       background-color: #041562;
       color: white;
@@ -186,18 +276,6 @@ const resize = () => {
       width: fit-content;
       max-width: 70%;
       margin-left: auto;
-      text-align: right;
-      box-sizing: border-box;
-    }
-
-    .test2 {
-      margin: 0.2rem;
-      background-color: #dedfe0;
-      color: #19191a;
-      padding: 0.5rem;
-      border-radius: 6px;
-      width: fit-content;
-      max-width: 70%;
       box-sizing: border-box;
       word-break: break-all;
     }
@@ -268,6 +346,47 @@ const resize = () => {
     }
   }
 
+  .chat_room-id {
+    width: 15rem;
+    border-radius: 8px;
+    background-color: white;
+    box-sizing: border-box;
+    padding: 1rem 0.5rem;
+    position: absolute;
+    bottom: 2%;
+    left: 0.5%;
+    border: 1px solid#e0e3e7;
+
+    .copy_box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1rem;
+
+      & > p {
+        margin: 0;
+        margin-right: auto;
+      }
+    }
+
+    .id_box {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.9rem;
+      background-color: #e3e5e8;
+      gap: 0.5rem;
+
+      & > p {
+        margin: 0;
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      width: 13rem;
+    }
+  }
+
   .menu {
     position: absolute;
     border-radius: 6px;
@@ -283,6 +402,10 @@ const resize = () => {
     max-width: 992px;
     position: fixed;
     bottom: 3.6rem;
+  }
+
+  .cursor-pointer {
+    cursor: pointer;
   }
 }
 </style>

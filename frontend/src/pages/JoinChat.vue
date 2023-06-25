@@ -25,7 +25,6 @@ import { RouterLink, useRoute } from "vue-router";
 const route = useRoute();
 const name = route.params.name
 const option = route.params.name === "private" ? "chat" : "group";
-console.log(option);
 </script>
 
 <style scoped></style>

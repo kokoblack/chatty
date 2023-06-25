@@ -3,10 +3,11 @@ import { ref } from "vue";
 
 export const useCounterStore = defineStore("user", () => {
   const roomID = ref("");
-  const chatID = ref("");
-  const name = ref("ffff");
+  const name = ref("");
   const routeOption = ref("");
   const routeName = ref("");
+  const id = ref("")
+  const admin = ref("")
 
   function setName(nam: string) {
     name.value = nam;
@@ -14,10 +15,6 @@ export const useCounterStore = defineStore("user", () => {
 
   function setRoomID(id: string) {
     roomID.value = id;
-  }
-  
-  function setChatID(id: string) {
-    chatID.value = id;
   }
 
   function setRouteOption(route: string) {
@@ -28,5 +25,26 @@ export const useCounterStore = defineStore("user", () => {
     routeName.value = route;
   }
 
-  return { roomID, chatID, name, routeOption, routeName, setName, setRoomID, setChatID, setRouteOption, setRouteName };
+  function setId(idf: string) {
+    id.value = idf;
+  }
+
+  function setAdmin(adm: string) {
+    admin.value = adm;
+  }
+
+  return {
+    roomID,
+    name,
+    routeOption,
+    routeName,
+    id,
+    admin,
+    setName,
+    setRoomID,
+    setRouteOption,
+    setRouteName,
+    setId,
+    setAdmin
+  };
 });
