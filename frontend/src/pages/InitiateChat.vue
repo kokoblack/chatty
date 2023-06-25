@@ -2,7 +2,7 @@
   <div class="center">
     <Logo />
     <input
-      @focus="() => (nameValidation = '')"
+      @focus="() => ((nameValidation = ''), (chatIDValidation = ''))"
       class="input"
       type="text"
       placeholder="name"
@@ -10,13 +10,20 @@
     />
     <p class="error" v-show="nameValidation">{{ nameValidation }}</p>
     <input
+      @focus="() => ((nameValidation = ''), (chatIDValidation = ''))"
       v-if="option === 'Join'"
       class="input"
       type="text"
       placeholder="link"
       v-model="chatID"
     />
-    <button class="button" @click="user">{{ option }} {{ routerName }}</button>
+    <p class="error" v-show="chatIDValidation">{{ chatIDValidation }}</p>
+    <button v-if="option !== 'Join'" class="button" @click="createChat">
+      Create {{ routerName }}
+    </button>
+    <button v-if="option === 'Join'" class="button" @click="joinChat">
+      Join {{ routerName }}
+    </button>
   </div>
 </template>
 
@@ -26,45 +33,81 @@ import Logo from "../components/Logo.vue";
 import { useRoute, useRouter } from "vue-router";
 import { v4 as uuidv4 } from "uuid";
 import { useCounterStore } from "../stores/UserStore";
-// import axios from "axios";
 import { ref } from "vue";
+import axios from "axios";
 
 const store = useCounterStore();
-const { setName, setRoomID, setChatID, setRouteOption, setRouteName } = store;
+const { setName, setRoomID, setRouteOption, setRouteName, setId, setAdmin } = store;
 const route = useRoute();
 const navigate = useRouter();
 const routerName = route.params.name === "group" ? "Group" : "Chat";
 const option = route.params.option === "join" ? "Join" : "Create";
 const linkID = uuidv4();
+const _id = uuidv4()
 const chatID = ref("");
-const linkName = option === 'Join' ? chatID : linkID
 const name = ref("");
+const userValidation = ref("");
 const nameValidation = ref("");
+const chatIDValidation = ref("");
 
-const user = () => {
-  // if (name.value === "") {
-  //   nameValidation.value = "Please provide a name";
-  // } else {
-  //   axios
-  //     .post("http://localhost:3000/users", {
-  //       name: name.value,
-  //       ID: "",
-  //       linkID: linkID,
-  //       roomID: "",
-  //     })
-  //     .then((res) => {
-  //       console.log(res);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  setName(name.value);
-  setRoomID(linkID);
-  setChatID(chatID.value);
-  setRouteName(routerName);
-  setRouteOption(option);
-  navigate.push(`/chat-room/${linkName}`);
-  // }
+const joinChat = async () => {
+  if (!name.value && !chatID.value) {
+    nameValidation.value = "Please provide a name";
+    chatIDValidation.value = "Please provide a chat ID";
+  } else if (!chatID.value) {
+    chatIDValidation.value = "Please provide a chat ID";
+  } else if (!name.value) {
+    nameValidation.value = "Please provide a name";
+  } else {
+    setName(name.value);
+    setRouteName(routerName);
+    setRouteOption(option);
+    setRoomID(chatID.value);
+    setId(_id)
+    setAdmin("no")
+
+    if (route.params.name === "private") {
+      const users = ref([]);
+      await axios
+        .get(`http://localhost:3000/rooms/${chatID.value}`)
+        .then((res) => (users.value = res.data.user))
+        .catch((err) => console.log(err));
+
+      if (users.value.length === 2) {
+        userValidation.value = `you can't join this room, only two users are allowed.`;
+        alert(userValidation.value);
+      } else {
+        navigate.push(`/chat-room/${chatID.value}`);
+      }
+    } else {
+      navigate.push(`/chat-room/${chatID.value}`);
+    }
+  }
+};
+
+const createChat = async () => {
+  if (name.value === "") {
+    nameValidation.value = "Please provide a name";
+  } else {
+    setName(name.value);
+    setRouteName(routerName);
+    setRouteOption(option);
+    setRoomID(linkID);
+    setId(_id)
+    setAdmin("yes")
+
+
+    await axios
+      .post("http://localhost:3000/rooms", {
+        _id: linkID,
+        user: [],
+        conversation: [],
+      })
+      .then((res) => console.log(res.data))
+      .catch((err) => console.log(err));
+
+    navigate.push(`/chat-room/${linkID}`);
+  }
 };
 </script>
 
