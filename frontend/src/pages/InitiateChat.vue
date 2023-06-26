@@ -1,5 +1,13 @@
 <template>
-  <div class="center">
+  <div
+    class="center"
+    v-if="
+      (route.params.name === 'private' && route.params.option === 'create') ||
+      (route.params.name === 'private' && route.params.option === 'join') ||
+      (route.params.name === 'group' && route.params.option === 'create') ||
+      (route.params.name === 'group' && route.params.option === 'join')
+    "
+  >
     <Logo />
     <input
       @focus="() => ((nameValidation = ''), (chatIDValidation = ''))"
@@ -25,6 +33,7 @@
       Join {{ routerName }}
     </button>
   </div>
+  <h1 v-else class="not_found">Page Not Found</h1>
 </template>
 
 <script setup lang="ts">
@@ -37,13 +46,16 @@ import { ref } from "vue";
 import axios from "axios";
 
 const store = useCounterStore();
-const { setName, setRoomID, setRouteOption, setRouteName, setId, setAdmin } = store;
+const { setName, setRoomID, setRouteOption, setRouteName, setId, setAdmin } =
+  store;
 const route = useRoute();
 const navigate = useRouter();
+const routeName = route.params.name === 'private' ? 'private' : 'group'
+const routeOption = route.params.option === "join" ? "join" : "create";
 const routerName = route.params.name === "group" ? "Group" : "Chat";
 const option = route.params.option === "join" ? "Join" : "Create";
 const linkID = uuidv4();
-const _id = uuidv4()
+const _id = uuidv4();
 const chatID = ref("");
 const name = ref("");
 const userValidation = ref("");
@@ -60,11 +72,11 @@ const joinChat = async () => {
     nameValidation.value = "Please provide a name";
   } else {
     setName(name.value);
-    setRouteName(routerName);
-    setRouteOption(option);
+    setRouteName(routeName);
+    setRouteOption(routeOption);
     setRoomID(chatID.value);
-    setId(_id)
-    setAdmin("no")
+    setId(_id);
+    setAdmin("no");
 
     if (route.params.name === "private") {
       const users = ref([]);
@@ -90,12 +102,11 @@ const createChat = async () => {
     nameValidation.value = "Please provide a name";
   } else {
     setName(name.value);
-    setRouteName(routerName);
-    setRouteOption(option);
+    setRouteName(routeName);
+    setRouteOption(routeOption);
     setRoomID(linkID);
-    setId(_id)
-    setAdmin("yes")
-
+    setId(_id);
+    setAdmin("yes");
 
     await axios
       .post("http://localhost:3000/rooms", {

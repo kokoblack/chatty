@@ -1,7 +1,8 @@
 <template>
   <div class="chat_room-container">
     <div class="chat_room-header">
-      <p>Waiting for other user</p>
+      <p v-show="session.routeName === 'private'">{{ privateStatus }}</p>
+      <p v-show="session.routeName === 'group'">{{ groupStatus }}</p>
       <v-icon
         @click="menu = !menu"
         class="icon"
@@ -97,6 +98,9 @@ const store = useCounterStore();
 const { name, routeOption, roomID, id, admin, routeName } = storeToRefs(store);
 const messages = ref<Message>([]);
 const connect = ref("");
+const users = ref<string[]>([]);
+const privateStatus = ref("Waiting for other user");
+const groupStatus = ref("Waiting for other users");
 const refs = ref();
 const menu = ref(false);
 const chatIDMenu = ref(false);
@@ -110,26 +114,26 @@ const route = useRoute();
 // const style = routeOption.value === "Join" ? "style1" : "style2";
 const ID = route.params.room;
 const session = ref({
-  name : name.value,
+  name: name.value,
   routeOption: routeOption.value,
   roomID: roomID.value,
   id: id.value,
   admin: admin.value,
-  routeName: routeName.value
-})
+  routeName: routeName.value,
+});
 
-if (!name.value && !sessionStorage.getItem('store')) {
-  navigate.push("/")
+if (!name.value && !sessionStorage.getItem("store")) {
+  navigate.push("/");
 }
 
 if (!name.value) {
-    const storage = JSON.parse(sessionStorage.getItem('store')!)
-    session.value = storage
-  } else {
-    sessionStorage.setItem('store', JSON.stringify(session.value))
+  const storage = JSON.parse(sessionStorage.getItem("store")!);
+  session.value = storage;
+} else {
+  sessionStorage.setItem("store", JSON.stringify(session.value));
 }
 
-session.value?.routeOption === "Create"
+session.value?.routeOption === "create"
   ? (chatIDMenu.value = true)
   : (chatIDMenu.value = false);
 
@@ -174,17 +178,58 @@ socket.emit("new user", {
   name: session.value?.name,
   id: session.value?.id,
   admin: session.value?.admin,
-  roomID: session.value?.roomID
-})
-socket.on("user connected", (newUser) => {
-  connect.value = newUser
-  console.log(newUser);
+  roomID: session.value?.roomID,
+}, ID);
+socket.on("user connected", (newUser, admin, notAdmin) => {
+  privateStatus.value = `${newUser} online`;
+  connect.value = newUser;
+  console.log(admin);
+  console.log(notAdmin);
 });
-socket.on("users", (users) => {
-  console.log(users);
-})
+socket.on("users", (user, admin, notAdmin) => {
+  users.value = user;
+    if (users.value.length === 2) {
+      groupStatus.value = `${users.value[0]}, ${users.value[1]} connected`;
+    } else if (users.value.length === 3) {
+      groupStatus.value = `${users.value[0]}, ${users.value[1]}, ${users.value[2]} connected`;
+    } else if (users.value.length > 3) {
+      groupStatus.value = `${users.value[0]}, ${users.value[1]}, ${
+        users.value[2]
+      } and ${users.value.length - 3} connected`;
+    }
+
+  if (session.value.routeOption === "join") {
+    if (admin.length) {
+      privateStatus.value = `${admin[0].name} online`;
+    }
+  } else {
+    if (notAdmin.length) {
+      privateStatus.value = `${notAdmin[0].name} online`;
+    }
+  }
+
+  console.log(user);
+});
 socket.emit("join-room", ID);
 socket.on("chat message", (msg) => messages.value.push(msg));
+socket.on("offline", (user, offlineUsers) => {
+  privateStatus.value = `${user[0]?.name} offline`;
+
+  const offline = offlineUsers.map((eve: any) => eve.name);
+  users.value = offline;
+
+  if (users.value.length === 1) {
+    groupStatus.value = `Waiting for other users`;
+  } else if (users.value.length === 2) {
+    groupStatus.value = `${users.value[0]}, ${users.value[1]} connected`;
+  } else if (users.value.length === 3) {
+    groupStatus.value = `${users.value[0]}, ${users.value[1]}, ${users.value[2]} connected`;
+  } else if (users.value.length > 3) {
+    groupStatus.value = `${users.value[0]}, ${users.value[1]}, ${
+      users.value[2]
+    } and ${users.value.length - 3} connected`;
+  }
+});
 
 const newMsg = (e: Event) => {
   e.preventDefault();
