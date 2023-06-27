@@ -8,13 +8,16 @@
       (route.params.name === 'group' && route.params.option === 'join')
     "
   >
+    <div v-show="showError" class="display-error">
+      <ErrorMessage :message="userValidation" @close-error="closeError" />
+    </div>
     <Logo />
     <input
       @focus="() => ((nameValidation = ''), (chatIDValidation = ''))"
       class="input"
       type="text"
       placeholder="name"
-      v-model="name"
+      v-model.trim="name"
     />
     <p class="error" v-show="nameValidation">{{ nameValidation }}</p>
     <input
@@ -23,7 +26,7 @@
       class="input"
       type="text"
       placeholder="link"
-      v-model="chatID"
+      v-model.trim="chatID"
     />
     <p class="error" v-show="chatIDValidation">{{ chatIDValidation }}</p>
     <button v-if="option !== 'Join'" class="button" @click="createChat">
@@ -44,25 +47,36 @@ import { v4 as uuidv4 } from "uuid";
 import { useCounterStore } from "../stores/UserStore";
 import { ref } from "vue";
 import axios from "axios";
+import ErrorMessage from "../components/ErrorMessage.vue";
 
 const store = useCounterStore();
 const { setName, setRoomID, setRouteOption, setRouteName, setId, setAdmin } =
   store;
 const route = useRoute();
 const navigate = useRouter();
-const routeName = route.params.name === 'private' ? 'private' : 'group'
+const routeName = route.params.name === "private" ? "private" : "group";
 const routeOption = route.params.option === "join" ? "join" : "create";
 const routerName = route.params.name === "group" ? "Group" : "Chat";
 const option = route.params.option === "join" ? "Join" : "Create";
 const linkID = uuidv4();
 const _id = uuidv4();
+const showError = ref(false);
 const chatID = ref("");
 const name = ref("");
 const userValidation = ref("");
 const nameValidation = ref("");
 const chatIDValidation = ref("");
 
+console.log(route.params.name);
+
+const closeError = (close: boolean) => {
+  showError.value = close;
+};
+
 const joinChat = async () => {
+  type User = { user: string[]; room: string };
+  const users = ref<User>(null!);
+
   if (!name.value && !chatID.value) {
     nameValidation.value = "Please provide a name";
     chatIDValidation.value = "Please provide a chat ID";
@@ -78,19 +92,25 @@ const joinChat = async () => {
     setId(_id);
     setAdmin("no");
 
-    if (route.params.name === "private") {
-      const users = ref([]);
-      await axios
-        .get(`http://localhost:3000/rooms/${chatID.value}`)
-        .then((res) => (users.value = res.data.user))
-        .catch((err) => console.log(err));
+    await axios
+      .get(`http://localhost:3000/rooms/${chatID.value}`)
+      .then((res) => {
+        users.value = res.data;
+        console.log(res.data);
+      })
+      .catch((err) => console.log(err));
 
-      if (users.value.length === 2) {
-        userValidation.value = `you can't join this room, only two users are allowed.`;
-        alert(userValidation.value);
+    if (users.value?.room === "private") {
+      if (users.value?.user.length >= 2) {
+        userValidation.value = `unable to join room, only two users are allowed.`;
+        showError.value = true;
       } else {
         navigate.push(`/chat-room/${chatID.value}`);
       }
+    } else if (users.value?.room !== route.params.name) {
+      userValidation.value =
+        "The room ID provided doesn't match this room. Please select the correct room.";
+      showError.value = true;
     } else {
       navigate.push(`/chat-room/${chatID.value}`);
     }
@@ -111,6 +131,7 @@ const createChat = async () => {
     await axios
       .post("http://localhost:3000/rooms", {
         _id: linkID,
+        room: route.params.name,
         user: [],
         conversation: [],
       })
@@ -134,6 +155,11 @@ const createChat = async () => {
     border: 1px solid #11468f;
     outline: none;
   }
+}
+
+.display-error {
+  position: absolute;
+  // top:
 }
 
 .error {
