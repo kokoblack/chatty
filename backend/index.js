@@ -89,7 +89,7 @@ io.on("connection", (socket) => {
   console.log(`${socket.id} connected `);
 
   socket
-    .on("new user", async (user) => {
+    .on("new user", async (user, room) => {
       const roomID = user.roomID;
       const newUser = {
         name: user.name,
@@ -101,9 +101,13 @@ io.on("connection", (socket) => {
       await Room.updateOne({ _id: roomID }, { $push: { user: newUser } });
 
       const users = await Room.findById(user.roomID, "user");
+      const onlineUsers = users.user.map((eve) => eve.name)
+      const admin = users.user.filter((eve) => eve.admin === 'yes')
+      const notAdmin = users.user.filter((eve) => eve.admin === 'no')
+      console.log(admin)
 
-      socket.emit("users", users.user);
-      socket.broadcast.emit("user connected", user.name);
+      io.sockets.in(room).emit("users", onlineUsers, admin, notAdmin);
+      socket.to(room).emit("user connected", user.name, admin, notAdmin);
       socket.on("disconnect", async () => {
         const users = await Room.findById(user.roomID, "user");
         const connectedUsers = users.user.filter(
@@ -118,7 +122,7 @@ io.on("connection", (socket) => {
           { $set: { user: connectedUsers } }
         );
 
-        socket.emit("offline", offlineUser);
+        socket.to(room).emit("offline", offlineUser, connectedUsers);
       });
     })
 

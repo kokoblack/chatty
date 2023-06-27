@@ -3,7 +3,7 @@
     class="center"
     v-if="route.params.name === 'private' || route.params.name === 'group'"
   >
-  <Logo/>
+    <Logo />
 
     <div>
       <RouterLink :to="`/chat/${name}/create`" class="shadow-text"
@@ -19,11 +19,11 @@
 
 <script setup lang="ts">
 import "../styles/global.scss";
-import Logo from "../components/Logo.vue"
+import Logo from "../components/Logo.vue";
 import { RouterLink, useRoute } from "vue-router";
 
 const route = useRoute();
-const name = route.params.name
+const name = route.params.name;
 const option = route.params.name === "private" ? "chat" : "group";
 </script>
 
