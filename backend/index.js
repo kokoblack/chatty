@@ -20,6 +20,7 @@ mongoose.connect("mongodb://127.0.0.1:27017/chattyDB");
 
 const chattySchema = new mongoose.Schema({
   _id: String,
+  room: String,
   user: [
     {
       name: String,
@@ -48,8 +49,12 @@ app.route("/rooms").post(async (req, res) => {
 app
   .route("/rooms/:roomID")
   .get(async (req, res) => {
-    const users = await Room.findById(req.params.roomID, "user");
-    res.send(users);
+    const users = await Room.findById(req.params.roomID);
+    const user = {
+      user: users.user,
+      room: users.room
+    }
+    res.send(user);
   })
   .patch(async (req, res) => {
     newUser.name = req.body.name;
