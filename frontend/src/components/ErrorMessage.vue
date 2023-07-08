@@ -14,7 +14,6 @@
 </template>
 
 <script setup lang="ts">
-// import {defineProps, defineEmits} from "vue"
 
 const { message } = defineProps({message: String});
 const emit = defineEmits(["closeError"]);

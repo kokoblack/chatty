@@ -67,15 +67,13 @@ const userValidation = ref("");
 const nameValidation = ref("");
 const chatIDValidation = ref("");
 
-console.log(route.params.name);
-
 const closeError = (close: boolean) => {
   showError.value = close;
 };
 
 const joinChat = async () => {
   type User = { user: string[]; room: string };
-  const users = ref<User>(null!);
+  const users = ref<User | null>(null);
 
   if (!name.value && !chatID.value) {
     nameValidation.value = "Please provide a name";
@@ -96,23 +94,33 @@ const joinChat = async () => {
       .get(`http://localhost:3000/rooms/${chatID.value}`)
       .then((res) => {
         users.value = res.data;
-        console.log(res.data);
+        console.log(users.value);
       })
       .catch((err) => console.log(err));
 
-    if (users.value?.room === "private") {
-      if (users.value?.user.length >= 2) {
-        userValidation.value = `unable to join room, only two users are allowed.`;
+    if (users.value) {
+      if (route.params.name === "private") {
+        if (users.value?.room !== route.params.name) {
+          userValidation.value =
+            "The room ID provided doesn't match this room. Please select the correct room.";
+          showError.value = true;
+        } else if (users.value?.user.length >= 2) {
+          userValidation.value = `unable to join room, only two users are allowed.`;
+          showError.value = true;
+        } else {
+          navigate.push(`/chat-room/${chatID.value}`);
+        }
+      } else if (users.value?.room !== route.params.name) {
+        userValidation.value =
+          "The room ID provided doesn't match this room. Please select the correct room.";
         showError.value = true;
-      } else {
+      } else if (users.value?.room === route.params.name) {
         navigate.push(`/chat-room/${chatID.value}`);
       }
-    } else if (users.value?.room !== route.params.name) {
-      userValidation.value =
-        "The room ID provided doesn't match this room. Please select the correct room.";
-      showError.value = true;
     } else {
-      navigate.push(`/chat-room/${chatID.value}`);
+      userValidation.value =
+        "This room does not exist. Please create a new room";
+      showError.value = true;
     }
   }
 };
