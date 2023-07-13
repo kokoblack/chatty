@@ -25,7 +25,7 @@
       v-if="option === 'Join'"
       class="input"
       type="text"
-      placeholder="link"
+      placeholder="room ID"
       v-model.trim="chatID"
     />
     <p class="error" v-show="chatIDValidation">{{ chatIDValidation }}</p>

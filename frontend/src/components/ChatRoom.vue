@@ -279,6 +279,14 @@ const ScrollToBottom = () => {
   messageContainer?.scrollIntoView({ behavior: "smooth", block: "end" });
 };
 
+// const textarea = (e: KeyboardEvent) => {
+//   if (e.key === "Enter") {
+//     e.preventDefault()
+
+//     text.value += document.createElement('br')
+//   }
+// };
+
 const newMsg = (e: Event) => {
   e.preventDefault();
 
@@ -303,6 +311,8 @@ const newMsg = (e: Event) => {
       ID
     );
 
+    // revert the text area to it initial size
+    refs.value.style.height = "35px";
     // then the message is pushed to the message body then scroll to last div
     ScrollToBottom();
     // and set the text area to an empty string
@@ -411,7 +421,7 @@ axios
 axios
   .get(`http://localhost:3000/rooms/conversation/${ID}`)
   .then((res) => {
-    messages.value = res.data.conversation;
+    messages.value = res.data;
   })
   .catch((err) => console.log(err));
 
@@ -482,13 +492,13 @@ socket.on("users", (user, users) => {
 
   if (users?.length !== 0) {
     // remove existing user from newly connected user in a private room and notify existing user of   the connected user
-    const user = users.filter(
+    const user = users?.filter(
       (user: { name: string; admin: string; _id: string; socketID: string }) =>
         user._id !== session.value.id
     );
     console.log(user);
     if (user?.length !== 0) {
-      privateStatus.value = `${user[0].name} online`;
+      privateStatus.value = `${user[0]?.name} online`;
     }
   }
 });
@@ -575,10 +585,10 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
     position: relative;
 
     .last-child {
-      height: 16rem;
+      height: 20.5rem;
 
       @media screen and (max-width: 480px) {
-        height: 10.5rem;
+        height: 12.5rem;
       }
     }
 
@@ -613,7 +623,8 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
       margin: 0.2rem 0 0 auto;
       background-color: #041562;
       color: white;
-      @include s.chat-style(fit-content);    }
+      @include s.chat-style(fit-content);
+    }
 
     .chat-style1 {
       margin: 0.2rem auto 0 0;

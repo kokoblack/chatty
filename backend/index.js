@@ -1,10 +1,11 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const http = require("http");
 const { Server } = require("socket.io");
-const multer = require("multer");
+const CryptoJS = require("crypto-js");
 
 const app = express();
 const server = http.createServer(app);
@@ -13,7 +14,7 @@ const io = new Server(server, {
   cors: {
     origin: "http://localhost:5173",
   },
-  maxHttpBufferSize: 1e8
+  maxHttpBufferSize: 1e8,
 });
 
 app.use(bodyParser.json());
@@ -91,7 +92,18 @@ app
   .route("/rooms/conversation/:roomID")
   .get(async (req, res) => {
     const message = await Room.findById(req.params.roomID, "conversation");
-    res.send(message);
+    const conversation = message?.conversation?.map((msg) => {
+      return {
+        name: msg.name,
+        message: CryptoJS.AES.decrypt(
+          msg.message,
+          process.env.ENCRYPTION_KEY
+        ).toString(CryptoJS.enc.Utf8),
+        _id: msg._id,
+        option: msg.option,
+      };
+    });
+    res.send(conversation);
   })
   .patch(async (req, res) => {
     await Room.updateOne(
@@ -129,8 +141,7 @@ io.on("connection", (socket) => {
           const allUser = await Room.findById(user.roomID, "user");
           const onlineUsers = allUser?.user.map((eve) => eve.name);
           io.sockets.in(room).emit("online user", onlineUsers);
-        }
-        else {
+        } else {
           const updateSocketID = users?.user.map((user) => {
             if (user._id === newUser._id) {
               return newUser;
@@ -174,11 +185,24 @@ io.on("connection", (socket) => {
     .on("join-room", (room) => socket.join(room))
     .on("chat message", async (msg, room) => {
       socket.to(room).emit("chat message", msg);
+
+      const encryptedMessage = CryptoJS.AES.encrypt(
+        msg.message,
+        process.env.ENCRYPTION_KEY
+      ).toString();
+
+      const message = {
+        name: msg.name,
+        message: encryptedMessage,
+        _id: msg._id,
+        option: msg.option,
+      };
+
       await Room.updateOne(
         { _id: room },
         {
           $push: {
-            conversation: msg,
+            conversation: message,
           },
         }
       );
