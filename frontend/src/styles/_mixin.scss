@@ -1,0 +1,65 @@
+@mixin flex-center {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+@mixin chat-style($width) {
+	padding: 0.5rem;
+	border-radius: 6px;
+	width: $width;
+	max-width: 70%;
+	box-sizing: border-box;
+	word-break: break-all;
+	white-space: pre;
+}
+
+@mixin img-style ($bgcolor) {
+	display: block;
+    width: 35%;
+    background-color: $bgcolor;
+    padding: 0.2rem;
+    border-radius: 6px;
+    max-width: 70%;
+    box-sizing: border-box;
+
+    @media screen and (max-width: 480px) {
+      width: 50%;
+    }
+}
+
+@mixin group-chat-style {
+	@include chat-style(fit-content);
+
+	& > :first-child {
+		margin: 0 0 0.2rem 0;
+		font-size: 0.8rem;
+		color: #626266;
+	}
+
+	& > :last-child {
+		margin: 0;
+		font-size: 1rem;
+	}
+}
+
+@mixin group-img-style {
+	@include chat-style(fit-content);
+	padding: .2rem;
+
+	& > p {
+		margin: 0 0 0.3rem 0;
+		font-size: 0.8rem;
+		color: #626266;
+	}
+
+	& > img {
+		width: 35vw;
+		border-radius: 4px;
+
+		@media screen and (max-width: 480px) {
+			width: 50vw;
+		}
+	}
+}
+
