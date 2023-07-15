@@ -12,7 +12,7 @@ const server = http.createServer(app);
 const newUser = {};
 const io = new Server(server, {
   cors: {
-    origin: "https://chatty-henna-nine.vercel.app",
+    origin: "*",
   },
   maxHttpBufferSize: 1e8,
 });
