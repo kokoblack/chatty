@@ -12,7 +12,7 @@ const server = http.createServer(app);
 const newUser = {};
 const io = new Server(server, {
   cors: {
-    origin: "https://chatty-henna-nine.vercel.app/",
+    origin: "https://chatty-henna-nine.vercel.app",
   },
   maxHttpBufferSize: 1e8,
 });
@@ -20,7 +20,7 @@ const io = new Server(server, {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors({
-  origin: ["https://chatty-henna-nine.vercel.app/"],
+  origin: ["https://chatty-henna-nine.vercel.app"],
   methods: ["POST", "GET", "DELETE", "PATCH"],
   credentials: true
 }));
