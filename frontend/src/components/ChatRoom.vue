@@ -161,7 +161,7 @@ type Message = {
   _id: string;
 }[];
 
-const socket = io("http://localhost:3000");
+const socket = io("https://chatty-api-nine.vercel.app/");
 const store = useCounterStore();
 const { name, routeOption, roomID, id, admin, routeName } = storeToRefs(store);
 const messages = ref<Message>([]);
@@ -409,7 +409,7 @@ const openFile = () => {
 
 // check if room still exist in database
 axios
-  .get(`http://localhost:3000/rooms/${ID}`)
+  .get(`https://chatty-api-nine.vercel.app/rooms/${ID}`)
   .then((res) => {
     if (!res.data) {
       checkRoom.value = "Session expired";
@@ -419,7 +419,7 @@ axios
 
 // get all conversaton of a particular room when a user refresh or disconnect
 axios
-  .get(`http://localhost:3000/rooms/conversation/${ID}`)
+  .get(`https://chatty-api-nine.vercel.app/rooms/conversation/${ID}`)
   .then((res) => {
     messages.value = res.data;
   })
@@ -438,7 +438,7 @@ onBeforeUnmount(() => {
   socket.close();
 
   axios
-    .delete(`http://localhost:3000/rooms/${ID}`)
+    .delete(`https://chatty-api-nine.vercel.app/rooms/${ID}`)
     .catch((err) => console.log(err));
   console.log("unmount");
 });
