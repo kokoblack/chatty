@@ -21,7 +21,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
-mongoose.connect("mongodb://127.0.0.1:27017/chattyDB");
+mongoose.connect(process.env.MONGODB_URL);
 
 const chattySchema = new mongoose.Schema({
   _id: String,
