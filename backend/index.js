@@ -19,7 +19,11 @@ const io = new Server(server, {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+app.use(cors({
+  origin: ["https://chatty-henna-nine.vercel.app/"],
+  methods: ["POST", "GET", "DELETE", "PATCH"],
+  credentials: true
+}));
 
 mongoose.connect(process.env.MONGODB_URL);
 
