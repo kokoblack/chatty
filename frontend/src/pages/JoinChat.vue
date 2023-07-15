@@ -4,6 +4,7 @@
     v-if="route.params.name === 'private' || route.params.name === 'group'"
   >
     <Logo />
+    <Back />
 
     <div>
       <RouterLink :to="`/chat/${name}/create`" class="shadow-text"
@@ -18,6 +19,7 @@
 </template>
 
 <script setup lang="ts">
+import Back from "../components/Back.vue"
 import "../styles/global.scss";
 import Logo from "../components/Logo.vue";
 import { RouterLink, useRoute } from "vue-router";

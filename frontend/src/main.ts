@@ -9,7 +9,8 @@ import {
   BiImageFill,
   IoCopyOutline,
   IoCloseOutline,
-  RiMessage3Line
+  RiMessage3Line,
+  MdArrowbackOutlined
 } from "oh-vue-icons/icons";
 import "./main.scss";
 import router from "./router/router";
@@ -23,7 +24,8 @@ addIcons(
   BiThreeDotsVertical,
   IoCopyOutline,
   IoCloseOutline,
-  RiMessage3Line
+  RiMessage3Line,
+  MdArrowbackOutlined
 );
 
 createApp(App)
