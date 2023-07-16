@@ -12,14 +12,19 @@ const server = http.createServer(app);
 const newUser = {};
 const io = new Server(server, {
   cors: {
-    origin: "https://chatty-henna-nine.vercel.app/"
+    origin: "https://chatty-henna-nine.vercel.app",
+    credentials: true
   },
   maxHttpBufferSize: 1e8,
 });
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+app.use(cors({
+  origin: ["https://chatty-henna-nine.vercel.app"],
+  methods: ["POST", "GET", "PATCH", "DELETE", "OPTIONS", "PUT"],
+  credentials: true
+}));
 
 mongoose.connect(process.env.MONGODB_URL);
 

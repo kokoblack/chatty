@@ -161,7 +161,11 @@ type Message = {
   _id: string;
 }[];
 
-const socket = io("https://chatty-api-nine.vercel.app");
+axios.defaults.withCredentials = true
+
+const socket = io("https://chatty-api-nine.vercel.app", {
+  withCredentials: true
+});
 const store = useCounterStore();
 const { name, routeOption, roomID, id, admin, routeName } = storeToRefs(store);
 const messages = ref<Message>([]);

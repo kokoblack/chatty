@@ -52,6 +52,8 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import ErrorMessage from "../components/ErrorMessage.vue";
 
+axios.defaults.withCredentials = true
+
 const store = useCounterStore();
 const { setName, setRoomID, setRouteOption, setRouteName, setId, setAdmin } =
   store;
