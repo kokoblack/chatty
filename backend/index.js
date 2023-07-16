@@ -15,6 +15,7 @@ const io = new Server(server, {
     origin: "https://chatty-henna-nine.vercel.app",
     credentials: true
   },
+  allowEIO3: true,
   maxHttpBufferSize: 1e8,
 });
 
