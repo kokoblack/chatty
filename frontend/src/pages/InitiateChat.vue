@@ -12,7 +12,9 @@
       <ErrorMessage :message="userValidation" @close-error="closeError" />
     </div>
     <Logo />
+    <Back />
     <input
+    ref="inputRef"
       @focus="() => ((nameValidation = ''), (chatIDValidation = ''))"
       class="input"
       type="text"
@@ -40,12 +42,13 @@
 </template>
 
 <script setup lang="ts">
+  import Back from "../components/Back.vue"
 import "../styles/global.scss";
 import Logo from "../components/Logo.vue";
 import { useRoute, useRouter } from "vue-router";
 import { v4 as uuidv4 } from "uuid";
 import { useCounterStore } from "../stores/UserStore";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
 import ErrorMessage from "../components/ErrorMessage.vue";
 
@@ -63,6 +66,7 @@ const _id = uuidv4();
 const showError = ref(false);
 const chatID = ref("");
 const name = ref("");
+const inputRef = ref<HTMLInputElement>() 
 const userValidation = ref("");
 const nameValidation = ref("");
 const chatIDValidation = ref("");
@@ -149,6 +153,10 @@ const createChat = async () => {
     navigate.push(`/chat-room/${linkID}`);
   }
 };
+
+onMounted(() => {
+  inputRef.value?.focus()
+})
 </script>
 
 <style scoped lang="scss">

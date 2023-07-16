@@ -357,7 +357,7 @@ const file = (e: Event) => {
       }, 3000);
     } else if (file.size > 1024 * 1024) {
       // if the image is > than 1mb send error message to user and reset input file
-      imageValidation.value = "select an image > 1mb";
+      imageValidation.value = "select an image < 1mb";
       form.reset();
 
       // set a timeout to clear the message
