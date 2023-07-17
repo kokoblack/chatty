@@ -22,7 +22,7 @@ const io = new Server(server, {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors({
-  origin: ["https://chatty-henna-nine.vercel.app"],
+  origin: "*",
   methods: ["POST", "GET", "PATCH", "DELETE", "OPTIONS", "PUT"],
   credentials: true
 }));
