@@ -55,6 +55,10 @@ const chattySchema = new mongoose.Schema({
 
 const Room = mongoose.model("Room", chattySchema);
 
+app.route("/").get((req,res) => {
+  res.send("server is working")
+})
+
 app.route("/rooms").post(async (req, res) => {
   const room = new Room(req.body);
   await room.save();
