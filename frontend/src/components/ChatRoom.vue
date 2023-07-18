@@ -18,9 +18,10 @@
       ></v-icon>
     </div>
     <div @click="closeMenu" class="chat_room-body" id="scroll-to-bottom">
-      <div v-show="imageValidation" class="img-error">
+      <!--  <div v-show="imageValidation" class="img-error">
         <p>{{ imageValidation }}</p>
-      </div>
+      </div> -->
+      <Error v-show="imageValidation" :message="imageValidation" />
       <form class="hidden" id="form">
         <input
           id="input-file"
@@ -152,7 +153,7 @@ import { storeToRefs } from "pinia";
 import { useRouter, useRoute } from "vue-router";
 import { VuemojiPicker, EmojiClickEventDetail } from "vuemoji-picker";
 import axios from "axios";
-// import "../styles/global.scss"
+import Error from "../components/Error.vue";
 
 type Message = {
   name: string;
@@ -161,10 +162,10 @@ type Message = {
   _id: string;
 }[];
 
-axios.defaults.withCredentials = true
+axios.defaults.withCredentials = true;
 
 const socket = io("https://chatty-api-nine.vercel.app", {
-  withCredentials: true
+  withCredentials: true,
 });
 const store = useCounterStore();
 const { name, routeOption, roomID, id, admin, routeName } = storeToRefs(store);
@@ -312,7 +313,10 @@ const newMsg = (e: Event) => {
         _id: session.value?.id,
         option: "message",
       },
-      ID
+      ID,
+      (response: any) => {
+        console.log(response);
+      }
     );
 
     // revert the text area to it initial size
@@ -392,7 +396,10 @@ const file = (e: Event) => {
             _id: session.value?.id,
             option: "image",
           },
-          ID
+          ID,
+          (response: any) => {
+            console.log(response);
+          }
         );
 
         // reset input file and scroll to the last message

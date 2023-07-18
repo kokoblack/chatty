@@ -10,7 +10,9 @@ import {
   IoCopyOutline,
   IoCloseOutline,
   RiMessage3Line,
-  MdArrowbackOutlined
+  MdArrowbackOutlined,
+  IoTimeSharp,
+  IoCheckmarkDoneCircle
 } from "oh-vue-icons/icons";
 import "./main.scss";
 import router from "./router/router";
@@ -25,7 +27,9 @@ addIcons(
   IoCopyOutline,
   IoCloseOutline,
   RiMessage3Line,
-  MdArrowbackOutlined
+  MdArrowbackOutlined,
+  IoTimeSharp,
+  IoCheckmarkDoneCircle
 );
 
 createApp(App)

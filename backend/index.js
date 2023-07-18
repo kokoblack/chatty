@@ -13,7 +13,7 @@ const newUser = {};
 const io = new Server(server, {
   cors: {
     origin: "https://chatty-henna-nine.vercel.app",
-    credentials: true
+    credentials: true,
   },
   allowEIO3: true,
   maxHttpBufferSize: 1e8,
@@ -21,11 +21,14 @@ const io = new Server(server, {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors({
-  origin: "*",
-  methods: ["POST", "GET", "PATCH", "DELETE", "OPTIONS", "PUT"],
-  credentials: true
-}));
+// app.use(cors())
+app.use(
+  cors({
+    origin: ["https://chatty-henna-nine.vercel.app"],
+    methods: ["POST", "GET", "PATCH", "DELETE", "OPTIONS", "PUT"],
+    credentials: true,
+  })
+);
 
 mongoose.connect(process.env.MONGODB_URL);
 
@@ -189,7 +192,11 @@ io.on("connection", (socket) => {
     })
 
     .on("join-room", (room) => socket.join(room))
-    .on("chat message", async (msg, room) => {
+    .on("chat message", async (msg, room, callback) => {
+      callback({
+        status: "ok",
+      });
+
       socket.to(room).emit("chat message", msg);
 
       const encryptedMessage = CryptoJS.AES.encrypt(
