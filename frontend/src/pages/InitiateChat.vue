@@ -11,10 +11,11 @@
     <div v-show="showError" class="display-error">
       <ErrorMessage :message="userValidation" @close-error="closeError" />
     </div>
+    <Error v-show="errorMessage" :message="errorMessage" />
     <Logo />
     <Back />
     <input
-    ref="inputRef"
+      ref="inputRef"
       @focus="() => ((nameValidation = ''), (chatIDValidation = ''))"
       class="input"
       type="text"
@@ -42,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-  import Back from "../components/Back.vue"
+import Back from "../components/Back.vue";
 import "../styles/global.scss";
 import Logo from "../components/Logo.vue";
 import { useRoute, useRouter } from "vue-router";
@@ -51,8 +52,9 @@ import { useCounterStore } from "../stores/UserStore";
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import ErrorMessage from "../components/ErrorMessage.vue";
+import Error from "../components/Error.vue";
 
-axios.defaults.withCredentials = true
+axios.defaults.withCredentials = true;
 
 const store = useCounterStore();
 const { setName, setRoomID, setRouteOption, setRouteName, setId, setAdmin } =
@@ -68,18 +70,19 @@ const _id = uuidv4();
 const showError = ref(false);
 const chatID = ref("");
 const name = ref("");
-const inputRef = ref<HTMLInputElement>() 
+const inputRef = ref<HTMLInputElement>();
 const userValidation = ref("");
 const nameValidation = ref("");
 const chatIDValidation = ref("");
+const errorMessage = ref("");
 
 const closeError = (close: boolean) => {
   showError.value = close;
 };
 
 const joinChat = async () => {
-  type User = { user: string[]; room: string };
-  const users = ref<User | null>(null);
+  // type User = { user: string[]; room: string };
+  // const users = ref<User | null>();
 
   if (!name.value && !chatID.value) {
     nameValidation.value = "Please provide a name";
@@ -99,35 +102,46 @@ const joinChat = async () => {
     await axios
       .get(`https://chatty-api-nine.vercel.app/rooms/${chatID.value}`)
       .then((res) => {
-        users.value = res.data;
-        console.log(users.value);
-      })
-      .catch((err) => console.log(err));
+        // users.value = res.data;
 
-    if (users.value) {
-      if (route.params.name === "private") {
-        if (users.value?.room !== route.params.name) {
-          userValidation.value =
-            "The room ID provided doesn't match this room. Please select the correct room.";
-          showError.value = true;
-        } else if (users.value?.user.length >= 2) {
-          userValidation.value = `unable to join room, only two users are allowed.`;
-          showError.value = true;
+        if (res.data) {
+          if (route.params.name === "private") {
+            if (res.data?.room !== route.params.name) {
+              userValidation.value =
+                "The room ID provided doesn't match this room. Please select the correct room.";
+              showError.value = true;
+            } else if (res.data?.user.length >= 2) {
+              userValidation.value = `unable to join room, only two users are allowed.`;
+              showError.value = true;
+            } else {
+              navigate.push(`/chat-room/${chatID.value}`);
+            }
+          } else if (res.data?.room !== route.params.name) {
+            userValidation.value =
+              "The room ID provided doesn't match this room. Please select the correct room.";
+            showError.value = true;
+          } else if (res.data?.room === route.params.name) {
+            navigate.push(`/chat-room/${chatID.value}`);
+          }
         } else {
-          navigate.push(`/chat-room/${chatID.value}`);
+          userValidation.value =
+            "This room does not exist. Please create a new room";
+          showError.value = true;
         }
-      } else if (users.value?.room !== route.params.name) {
-        userValidation.value =
-          "The room ID provided doesn't match this room. Please select the correct room.";
-        showError.value = true;
-      } else if (users.value?.room === route.params.name) {
-        navigate.push(`/chat-room/${chatID.value}`);
-      }
-    } else {
-      userValidation.value =
-        "This room does not exist. Please create a new room";
-      showError.value = true;
-    }
+
+        console.log(res);
+      })
+      .catch((err) => {
+        errorMessage.value =
+          "unable to connect at the moment. Please try again";
+
+        console.log(errorMessage.value);
+
+        setTimeout(() => {
+          errorMessage.value = "";
+        }, 3000);
+        console.log(err);
+      });
   }
 };
 
@@ -149,16 +163,27 @@ const createChat = async () => {
         user: [],
         conversation: [],
       })
-      .then((res) => console.log(res.data))
-      .catch((err) => console.log(err));
+      .then((res) => {
+        console.log(res.data);
+        navigate.push(`/chat-room/${linkID}`);
+      })
+      .catch((err) => {
+        errorMessage.value =
+          "unable to connect at the moment. Please try again";
 
-    navigate.push(`/chat-room/${linkID}`);
+        console.log(errorMessage.value);
+
+        setTimeout(() => {
+          errorMessage.value = "";
+        }, 3000);
+        console.log(err);
+      });
   }
 };
 
 onMounted(() => {
-  inputRef.value?.focus()
-})
+  inputRef.value?.focus();
+});
 </script>
 
 <style scoped lang="scss">
