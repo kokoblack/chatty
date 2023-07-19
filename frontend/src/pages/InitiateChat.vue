@@ -100,7 +100,7 @@ const joinChat = async () => {
     setAdmin("no");
 
     await axios
-      .get(`https://chatty-api-nine.vercel.app/rooms/${chatID.value}`)
+      .get(`https://chatty-api-chi.vercel.app/rooms/${chatID.value}`)
       .then((res) => {
         // users.value = res.data;
 
@@ -157,7 +157,7 @@ const createChat = async () => {
     setAdmin("yes");
 
     await axios
-      .post("https://chatty-api-nine.vercel.app/rooms", {
+      .post("https://chatty-api-chi.vercel.app/rooms", {
         _id: linkID,
         room: route.params.name,
         user: [],
