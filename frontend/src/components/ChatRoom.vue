@@ -630,6 +630,8 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
       background-color: #dedfe0;
       color: #19191a;
       @include s.chat-style(fit-content);
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .style2 {
@@ -637,6 +639,8 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
       background-color: #041562;
       color: white;
       @include s.chat-style(fit-content);
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .chat-style1 {
