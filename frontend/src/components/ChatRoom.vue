@@ -164,7 +164,7 @@ type Message = {
 
 axios.defaults.withCredentials = true;
 
-const socket = io("https://chatty-api-chi.vercel.app", {
+const socket = io("https://chatty-api-service.onrender.com", {
   withCredentials: true,
   transports: ["websocket"]
 });
@@ -421,7 +421,7 @@ const openFile = () => {
 
 // check if room still exist in database
 axios
-  .get(`https://chatty-api-chi.vercel.app/rooms/${ID}`)
+  .get(`https://chatty-api-service.onrender.com/rooms/${ID}`)
   .then((res) => {
     if (!res.data) {
       checkRoom.value = "Session expired";
@@ -431,7 +431,7 @@ axios
 
 // get all conversaton of a particular room when a user refresh or disconnect
 axios
-  .get(`https://chatty-api-chi.vercel.app/rooms/conversation/${ID}`)
+  .get(`https://chatty-api-service.onrender.com/rooms/conversation/${ID}`)
   .then((res) => {
     messages.value = res.data;
   })
@@ -450,7 +450,7 @@ onBeforeUnmount(() => {
   socket.close();
 
   axios
-    .delete(`https://chatty-api-chi.vercel.app/rooms/${ID}`)
+    .delete(`https://chatty-api-service.onrender.com/rooms/${ID}`)
     .catch((err) => console.log(err));
   console.log("unmount");
 });
