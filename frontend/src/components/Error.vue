@@ -16,7 +16,7 @@ const { message } = defineProps({ message: String });
 	position: fixed;
 	right: 0;
 	left: 0;
-	top: 15%;
+	top: 10%;
 	text-align: center;
 	width: fit-content;
 	border-radius: 6px;

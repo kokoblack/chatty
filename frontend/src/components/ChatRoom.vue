@@ -152,6 +152,7 @@ import { useCounterStore } from "../stores/UserStore";
 import { storeToRefs } from "pinia";
 import { useRouter, useRoute } from "vue-router";
 import { VuemojiPicker, EmojiClickEventDetail } from "vuemoji-picker";
+import { copyTextToClipboard } from "../components/CopyTextToClipboard";
 import axios from "axios";
 import Error from "../components/Error.vue";
 
@@ -166,7 +167,7 @@ axios.defaults.withCredentials = true;
 
 const socket = io("https://chatty-api-service.onrender.com", {
   withCredentials: true,
-  transports: ["websocket"]
+  transports: ["websocket"],
 });
 const store = useCounterStore();
 const { name, routeOption, roomID, id, admin, routeName } = storeToRefs(store);
@@ -260,13 +261,13 @@ const handleEmojiClick = (details: EmojiClickEventDetail) => {
 
 const copyText = () => {
   // allow user to copy the chat id to Clipboard
-  navigator.clipboard.writeText(session.value?.roomID);
+  copyTextToClipboard(session.value?.roomID);
   checkCopied.value = "Copied!";
 };
 
 const copyText2 = () => {
   // allow user to copy the room id to Clipboard and close the Clipboard menu
-  navigator.clipboard.writeText(route.params.room as string);
+  copyTextToClipboard(route.params.room as string);
   menu.value = false;
 };
 
