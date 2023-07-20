@@ -17,6 +17,7 @@ const io = new Server(server, {
   },
   allowEIO3: true,
   maxHttpBufferSize: 1e8,
+  pingTimeout: 60000
 });
 
 app.use(bodyParser.json());
