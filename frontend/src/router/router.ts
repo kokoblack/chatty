@@ -1,4 +1,5 @@
-import { createRouter, createWebHistory } from "vue-router";
+// import { createRouter, createWebHistory } from "vue-router";
+import VueRouter from "vue-router"
 import Home from "../pages/Home.vue";
 import JoinChat from "../pages/JoinChat.vue";
 import ChatWithAI from "../pages/ChatWithAI.vue";
@@ -6,8 +7,9 @@ import NotFound from "../pages/404.vue";
 import CreateJoinChat from "../pages/InitiateChat.vue";
 import ChatRoom from "../components/ChatRoom.vue"
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+const router = new VueRouter({
+  mode: "history",
+  // history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: "/",
