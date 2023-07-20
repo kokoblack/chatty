@@ -2,15 +2,15 @@
   "rewrites": [
     {
       "source": "/chat/:name",
-      "destination": "/src/pages/JoinChat.vue"
+      "destination": "/JoinChat"
     },
     {
       "source": "/chat/:name/:option",
-      "destination": "/src/pages/InitiateChat.vue"
+      "destination": "/InitiateChat"
     },
     {
       "source": "/chat-room/:room",
-      "destination": "/src/components/ChatRoom.vue"
+      "destination": "/ChatRoom"
     } 
   ]
 }

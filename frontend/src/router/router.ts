@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+// import VueRouter from "vue-router"
 import Home from "../pages/Home.vue";
 import JoinChat from "../pages/JoinChat.vue";
 import ChatWithAI from "../pages/ChatWithAI.vue";
