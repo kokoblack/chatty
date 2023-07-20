@@ -166,6 +166,7 @@ axios.defaults.withCredentials = true;
 
 const socket = io("https://chatty-api-chi.vercel.app", {
   withCredentials: true,
+  transports: ["websocket"]
 });
 const store = useCounterStore();
 const { name, routeOption, roomID, id, admin, routeName } = storeToRefs(store);
