@@ -30,6 +30,11 @@ const router = createRouter({
       component: CreateJoinChat,
     },
     {
+      path: "/chat/:name/:option/:id",
+      name: "chat2",
+      component: CreateJoinChat,
+    },
+    {
       path: "/ai-chat",
       name: "chat with AI",
       component: ChatWithAI,
