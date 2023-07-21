@@ -1,16 +1,3 @@
 {
-  "rewrites": [
-    {
-      "source": "/chat/:name",
-      "destination": "/JoinChat"
-    },
-    {
-      "source": "/chat/:name/:option",
-      "destination": "/InitiateChat"
-    },
-    {
-      "source": "/chat-room/:room",
-      "destination": "/ChatRoom"
-    } 
-  ]
+  "rewrites": [{ "source": "/:path*", "destination": "/index.html" }]
 }
