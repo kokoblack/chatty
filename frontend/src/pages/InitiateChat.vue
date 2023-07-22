@@ -2,10 +2,10 @@
   <div
     class="center"
     v-if="
-      (route.params.name === 'private' && route.params.option === 'create') ||
-      (route.params.name === 'private' && route.params.option === 'join') ||
-      (route.params.name === 'group' && route.params.option === 'create') ||
-      (route.params.name === 'group' && route.params.option === 'join')
+      (rName === 'private' && rOption === 'create' && !id) ||
+      (rName === 'private' && rOption === 'join') ||
+      (rName === 'group' && rOption === 'create' && !id) ||
+      (rName === 'group' && rOption === 'join')
     "
   >
     <div v-show="showError" class="display-error">
@@ -30,7 +30,7 @@
       type="text"
       placeholder="room ID"
       v-model.trim="chatID"
-    />
+      />
     <p class="error" v-show="chatIDValidation">{{ chatIDValidation }}</p>
     <button v-if="option !== 'Join'" class="button" @click="createChat">
       Create {{ routerName }}
@@ -75,6 +75,17 @@ const userValidation = ref("");
 const nameValidation = ref("");
 const chatIDValidation = ref("");
 const errorMessage = ref("");
+const id = ref(route.params.id)
+const rName = ref(route.params.name)
+const rOption = ref(route.params.option)
+
+if (route.params.id) {
+  chatID.value = route.params.id as string
+}
+
+console.log(id.value)
+console.log(rName.value)
+console.log(rOption.value)
 
 const closeError = (close: boolean) => {
   showError.value = close;
@@ -133,7 +144,7 @@ const joinChat = async () => {
       })
       .catch((err) => {
         errorMessage.value =
-          "unable to connect at the moment. Please try again";
+          "something went wrong. Please try again";
 
         console.log(errorMessage.value);
 
@@ -169,7 +180,7 @@ const createChat = async () => {
       })
       .catch((err) => {
         errorMessage.value =
-          "unable to connect at the moment. Please try again";
+          "something went wrong. Please try again";
 
         console.log(errorMessage.value);
 

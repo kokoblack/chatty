@@ -261,13 +261,13 @@ const handleEmojiClick = (details: EmojiClickEventDetail) => {
 
 const copyText = () => {
   // allow user to copy the chat id to Clipboard
-  copyTextToClipboard(session.value?.roomID);
+  copyTextToClipboard(`https://chatty-henna-nine.vercel.app/chat/private/join/${session.value?.roomID}`);
   checkCopied.value = "Copied!";
 };
 
 const copyText2 = () => {
   // allow user to copy the room id to Clipboard and close the Clipboard menu
-  copyTextToClipboard(route.params.room as string);
+  copyTextToClipboard(`https://chatty-henna-nine.vercel.app/chat/private/join/${route.params.room}`);
   menu.value = false;
 };
 
@@ -285,14 +285,6 @@ const ScrollToBottom = () => {
   // scroll to the last div hen a user send a new message
   messageContainer?.scrollIntoView({ behavior: "smooth", block: "end" });
 };
-
-// const textarea = (e: KeyboardEvent) => {
-//   if (e.key === "Enter") {
-//     e.preventDefault()
-
-//     text.value += document.createElement('br')
-//   }
-// };
 
 const newMsg = (e: Event) => {
   e.preventDefault();

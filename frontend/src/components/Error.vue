@@ -11,12 +11,12 @@ const { message } = defineProps({ message: String });
 <style scoped lang="scss">
 .err {
 	margin: 0 auto;
-	background-color: #ee6b6e;
+	background-color: #efb5b7;
 	padding: 0.2rem 0.5rem;
 	position: fixed;
 	right: 0;
 	left: 0;
-	top: 16%;
+	top: 4rem;
 	text-align: center;
 	width: fit-content;
 	border-radius: 6px;
