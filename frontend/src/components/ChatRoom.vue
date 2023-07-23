@@ -18,9 +18,6 @@
       ></v-icon>
     </div>
     <div @click="closeMenu" class="chat_room-body" id="scroll-to-bottom">
-      <!--  <div v-show="imageValidation" class="img-error">
-        <p>{{ imageValidation }}</p>
-      </div> -->
       <Error v-show="imageValidation" :message="imageValidation" />
       <form class="hidden" id="form">
         <input
@@ -32,18 +29,32 @@
         />
       </form>
       <template v-if="session?.routeName === 'private'" v-for="msg in messages">
-        <p
+        <div
           v-show="msg.option === 'message'"
           :class="session?.id === msg._id ? 'style2' : 'style1'"
         >
-          {{ msg.message }}
-        </p>
-        <img
-          v-if="msg.option === 'image'"
-          :src="msg.message"
+          <p>
+            {{ msg.message }}
+          </p>
+          <v-icon
+            v-show="session?.id === msg._id"
+            class="status-icon"
+            name="io-checkmark-done-circle"
+            scale=".9"
+          ></v-icon>
+        </div>
+        <div
           :class="session?.id === msg._id ? 'img2' : 'img1'"
-          @click="showImg(msg.message)"
-        />
+          v-if="msg.option === 'image'"
+        >
+          <img :src="msg.message" @click="showImg(msg.message)" />
+          <v-icon
+            v-show="session?.id === msg._id"
+            class="status-icon"
+            name="io-checkmark-done-circle"
+            scale=".9"
+          ></v-icon>
+        </div>
       </template>
 
       <template v-if="session?.routeName === 'group'" v-for="msg in messages">
@@ -56,6 +67,12 @@
         >
           <p v-show="session?.id !== msg._id">~{{ msg.name }}</p>
           <p v-show="msg.option === 'message'">{{ msg.message }}</p>
+          <v-icon
+            v-show="session?.id === msg._id"
+            class="status-icon"
+            name="io-checkmark-done-circle"
+            scale=".9"
+          ></v-icon>
         </div>
         <div
           v-if="msg.option === 'image'"
@@ -63,6 +80,12 @@
         >
           <p v-show="session?.id !== msg._id">~{{ msg.name }}</p>
           <img :src="msg.message" @click="showImg(msg.message)" />
+          <v-icon
+            v-show="session?.id === msg._id"
+            class="status-icon"
+            name="io-checkmark-done-circle"
+            scale=".9"
+          ></v-icon>
         </div>
       </template>
       <div class="last-child" id="last-child"></div>
@@ -261,13 +284,17 @@ const handleEmojiClick = (details: EmojiClickEventDetail) => {
 
 const copyText = () => {
   // allow user to copy the chat id to Clipboard
-  copyTextToClipboard(`https://chatty-henna-nine.vercel.app/chat/private/join/${session.value?.roomID}`);
+  copyTextToClipboard(
+    `https://chatty-henna-nine.vercel.app/chat/${session.value?.routeName}/join/${session.value?.roomID}`
+  );
   checkCopied.value = "Copied!";
 };
 
 const copyText2 = () => {
   // allow user to copy the room id to Clipboard and close the Clipboard menu
-  copyTextToClipboard(`https://chatty-henna-nine.vercel.app/chat/private/join/${route.params.room}`);
+  copyTextToClipboard(
+    `https://chatty-henna-nine.vercel.app/chat/${session.value?.routeName}/join/${route.params.room}`
+  );
   menu.value = false;
 };
 
@@ -597,6 +624,8 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
       }
     }
 
+    // .chat-container {}
+
     .img-error {
       display: block;
       margin: 0 auto;
@@ -618,20 +647,35 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
     }
 
     .style1 {
+      padding: 0.5rem;
       margin: 0.2rem auto 0 0;
       background-color: #dedfe0;
       color: #19191a;
       @include s.chat-style(fit-content);
+
+      & p {
+        margin: 0;
+      }
     }
 
     .style2 {
+      padding: 0.4rem 2rem 0.4rem 0.4rem;
       margin: 0.2rem 0 0 auto;
       background-color: #041562;
       color: white;
       @include s.chat-style(fit-content);
+
+      .status-icon {
+        @include s.status-icon;
+      }
+
+      & p {
+        margin: 0;
+      }
     }
 
     .chat-style1 {
+      padding: 0.5rem;
       margin: 0.2rem auto 0 0;
       background-color: #dedfe0;
       color: #19191a;
@@ -639,6 +683,7 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
     }
 
     .chat-style2 {
+      padding: 0.4rem 2rem 0.4rem 0.4rem;
       margin: 0.2rem 0 0 auto;
       background-color: #041562;
       color: white;
@@ -646,12 +691,14 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
     }
 
     .img-style1 {
+      padding: 0.2rem;
       margin: 0.2rem auto 0 0;
       background-color: #dedfe0;
       @include s.group-img-style;
     }
 
     .img-style2 {
+      padding: 0.2rem 0.2rem 1.2rem 0.2rem;
       margin: 0.2rem 0 0 auto;
       background-color: #041562;
       @include s.group-img-style;
@@ -659,13 +706,19 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
   }
 
   .img1 {
+    padding: 0.2rem;
     margin: 0.2rem auto 0 0;
     @include s.img-style(#dedfe0);
   }
 
   .img2 {
+    padding: 0.2rem 0.2rem 1.2rem 0.2rem;
     margin: 0.2rem 0 0 auto;
     @include s.img-style(#041562);
+
+    .status-icon {
+      @include s.status-icon;
+    }
   }
 
   .connection {
@@ -687,7 +740,10 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
     position: fixed;
     top: 0;
     left: 0;
+    right: 0;
+    margin: 0 auto;
     width: 100%;
+    max-width: 992px;
     min-height: 100vh;
     z-index: 20;
     box-sizing: border-box;
@@ -708,11 +764,12 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
     }
 
     & > img {
-      width: 70%;
+      width: 60%;
+      max-height: 90vh;
       text-align: center;
 
-      @media screen and (max-width: 992px) {
-        width: 100%;
+      @media screen and (max-width: 480px) {
+        width: 80%;
       }
     }
   }
@@ -823,7 +880,7 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
     background-color: #071d7c;
     color: white;
     padding: 0 1.2rem;
-    top: 3rem;
+    top: 3.5rem;
     right: 1rem;
   }
 

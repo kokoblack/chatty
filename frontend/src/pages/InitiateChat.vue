@@ -11,6 +11,11 @@
     <div v-show="showError" class="display-error">
       <ErrorMessage :message="userValidation" @close-error="closeError" />
     </div>
+    <div v-show="loading" class="loading">
+      <p v-show="rOption === 'create'">Initializing room</p>
+      <p v-show="rOption === 'join'">Joining room</p>
+      <Loading />
+    </div>
     <Error v-show="errorMessage" :message="errorMessage" />
     <Logo />
     <Back />
@@ -30,7 +35,7 @@
       type="text"
       placeholder="room ID"
       v-model.trim="chatID"
-      />
+    />
     <p class="error" v-show="chatIDValidation">{{ chatIDValidation }}</p>
     <button v-if="option !== 'Join'" class="button" @click="createChat">
       Create {{ routerName }}
@@ -53,6 +58,7 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 import ErrorMessage from "../components/ErrorMessage.vue";
 import Error from "../components/Error.vue";
+import Loading from "../components/Loading.vue";
 
 axios.defaults.withCredentials = true;
 
@@ -75,25 +81,24 @@ const userValidation = ref("");
 const nameValidation = ref("");
 const chatIDValidation = ref("");
 const errorMessage = ref("");
-const id = ref(route.params.id)
-const rName = ref(route.params.name)
-const rOption = ref(route.params.option)
+const loading = ref(false);
+const id = ref(route.params.id);
+const rName = ref(route.params.name);
+const rOption = ref(route.params.option);
 
 if (route.params.id) {
-  chatID.value = route.params.id as string
+  chatID.value = route.params.id as string;
 }
 
-console.log(id.value)
-console.log(rName.value)
-console.log(rOption.value)
+console.log(id.value);
+console.log(rName.value);
+console.log(rOption.value);
 
 const closeError = (close: boolean) => {
   showError.value = close;
 };
 
 const joinChat = async () => {
-  // type User = { user: string[]; room: string };
-  // const users = ref<User | null>();
 
   if (!name.value && !chatID.value) {
     nameValidation.value = "Please provide a name";
@@ -110,10 +115,16 @@ const joinChat = async () => {
     setId(_id);
     setAdmin("no");
 
+    loading.value = true;
+
     await axios
-      .get(`https://chatty-api-service.onrender.com/rooms/${chatID.value}`)
+      .get(`https://chatty-api-service.onrender.com/rooms/${chatID.value}`, {
+        timeout: 10000
+      })
       .then((res) => {
         // users.value = res.data;
+
+        loading.value = false;
 
         if (res.data) {
           if (route.params.name === "private") {
@@ -143,8 +154,9 @@ const joinChat = async () => {
         console.log(res);
       })
       .catch((err) => {
-        errorMessage.value =
-          "something went wrong. Please try again";
+        loading.value = false;
+
+        errorMessage.value = "something went wrong. Please try again";
 
         console.log(errorMessage.value);
 
@@ -167,20 +179,28 @@ const createChat = async () => {
     setId(_id);
     setAdmin("yes");
 
+    loading.value = true;
+
     await axios
-      .post("https://chatty-api-service.onrender.com/rooms", {
-        _id: linkID,
-        room: route.params.name,
-        user: [],
-        conversation: [],
-      })
+      .post(
+        "https://chatty-api-service.onrender.com/rooms",
+        {
+          _id: linkID,
+          room: route.params.name,
+          user: [],
+          conversation: [],
+        },
+        { timeout: 10000 }
+      )
       .then((res) => {
         console.log(res.data);
+        loading.value = false;
         navigate.push(`/chat-room/${linkID}`);
       })
       .catch((err) => {
-        errorMessage.value =
-          "something went wrong. Please try again";
+        loading.value = false;
+
+        errorMessage.value = "something went wrong. Please try again";
 
         console.log(errorMessage.value);
 
@@ -208,6 +228,26 @@ onMounted(() => {
   &:focus {
     border: 1px solid #11468f;
     outline: none;
+  }
+}
+
+.loading {
+  background-color: rgba(255, 255, 255, 0.3);
+  height: 100vh;
+  width: 100vw;
+  max-width: 992px;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  backdrop-filter: blur(4px) brightness(50%);
+  z-index: 10;
+
+  & p {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #041562;
   }
 }
 

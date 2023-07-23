@@ -4,7 +4,7 @@
 			<v-icon
 				class="error_message-icon"
 				name="io-close-outline"
-				scale=".9"
+				scale="1.1"
 				@click="buttonClick(false)"
 			>
 			</v-icon>
@@ -40,7 +40,7 @@ const buttonClick = (close: boolean) => {
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-		width: 13rem;
+		width: 14rem;
 		box-sizing: border-box;
 	}
 
@@ -53,7 +53,7 @@ const buttonClick = (close: boolean) => {
 	.error_message-text {
 		margin: 0;
 		text-align: center;
-		font-size: 0.8rem;
+		font-size: .9rem;
 		padding: 0 .5rem;
 	}
 }

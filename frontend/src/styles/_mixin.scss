@@ -4,8 +4,15 @@
 	align-items: center;
 }
 
+@mixin status-icon {
+	position: absolute;
+	bottom: 0.2rem;
+	right: 0.2rem;
+	color: white;
+}
+
 @mixin chat-style($width) {
-	padding: 0.5rem;
+	position: relative;
 	border-radius: 6px;
 	width: $width;
 	max-width: 70%;
@@ -14,18 +21,20 @@
 	white-space: pre-line;
 }
 
-@mixin img-style ($bgcolor) {
-	display: block;
-    width: 35%;
-    background-color: $bgcolor;
-    padding: 0.2rem;
-    border-radius: 6px;
-    max-width: 70%;
-    box-sizing: border-box;
+@mixin img-style($bgcolor) {
+	position: relative;
+	background-color: $bgcolor;
+	border-radius: 6px;
+	width: 35%;
+	box-sizing: border-box;
 
-    @media screen and (max-width: 480px) {
-      width: 50%;
-    }
+	& img {
+		width: 100%;
+
+		@media screen and (max-width: 480px) {
+			width: 50%;
+		}
+	}
 }
 
 @mixin group-chat-style {
@@ -37,15 +46,18 @@
 		color: #626266;
 	}
 
-	& > :last-child {
+	& > :nth-child(2) {
 		margin: 0;
 		font-size: 1rem;
+	}
+
+	.status-icon {
+		@include status-icon;
 	}
 }
 
 @mixin group-img-style {
 	@include chat-style(fit-content);
-	padding: .2rem;
 
 	& > p {
 		margin: 0 0 0.3rem 0;
@@ -61,5 +73,8 @@
 			width: 50vw;
 		}
 	}
-}
 
+	.status-icon {
+		@include status-icon;
+	}
+}
