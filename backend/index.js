@@ -50,6 +50,7 @@ const chattySchema = new mongoose.Schema({
       message: String,
       _id: String,
       option: String,
+      status: String
     },
   ],
 });
@@ -198,9 +199,7 @@ io.on("connection", (socket) => {
 
     .on("join-room", (room) => socket.join(room))
     .on("chat message", async (msg, room, callback) => {
-      callback({
-        status: "ok",
-      });
+      callback("success");
 
       socket.to(room).emit("chat message", msg);
 
