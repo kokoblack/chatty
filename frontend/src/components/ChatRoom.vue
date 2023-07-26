@@ -37,9 +37,15 @@
             {{ msg.message }}
           </p>
           <v-icon
-            v-show="session?.id === msg._id"
+            v-show="session?.id === msg._id && msg.status === 'sent'"
             class="status-icon"
             name="io-checkmark-done-circle"
+            scale=".9"
+          ></v-icon>
+          <v-icon
+            v-show="session?.id === msg._id && msg.status === 'not sent'"
+            class="status-icon"
+            name="io-time-sharp"
             scale=".9"
           ></v-icon>
         </div>
@@ -49,9 +55,15 @@
         >
           <img :src="msg.message" @click="showImg(msg.message)" />
           <v-icon
-            v-show="session?.id === msg._id"
+            v-show="session?.id === msg._id && msg.status === 'sent'"
             class="status-icon"
             name="io-checkmark-done-circle"
+            scale=".9"
+          ></v-icon>
+          <v-icon
+            v-show="session?.id === msg._id && msg.status === 'not sent'"
+            class="status-icon"
+            name="io-time-sharp"
             scale=".9"
           ></v-icon>
         </div>
@@ -68,9 +80,15 @@
           <p v-show="session?.id !== msg._id">~{{ msg.name }}</p>
           <p v-show="msg.option === 'message'">{{ msg.message }}</p>
           <v-icon
-            v-show="session?.id === msg._id"
+            v-show="session?.id === msg._id && msg.status === 'sent'"
             class="status-icon"
             name="io-checkmark-done-circle"
+            scale=".9"
+          ></v-icon>
+          <v-icon
+            v-show="session?.id === msg._id && msg.status === 'not sent'"
+            class="status-icon"
+            name="io-time-sharp"
             scale=".9"
           ></v-icon>
         </div>
@@ -81,9 +99,15 @@
           <p v-show="session?.id !== msg._id">~{{ msg.name }}</p>
           <img :src="msg.message" @click="showImg(msg.message)" />
           <v-icon
-            v-show="session?.id === msg._id"
+            v-show="session?.id === msg._id && msg.status === 'sent'"
             class="status-icon"
             name="io-checkmark-done-circle"
+            scale=".9"
+          ></v-icon>
+          <v-icon
+            v-show="session?.id === msg._id && msg.status === 'not sent'"
+            class="status-icon"
+            name="io-time-sharp"
             scale=".9"
           ></v-icon>
         </div>
@@ -184,6 +208,7 @@ type Message = {
   message: string;
   option: string;
   _id: string;
+  status: string;
 }[];
 
 axios.defaults.withCredentials = true;
@@ -323,6 +348,7 @@ const newMsg = (e: Event) => {
       message: text.value,
       _id: session.value?.id,
       option: "message",
+      status: "not sent",
     });
 
     // this send the message to backend to other users
@@ -333,10 +359,17 @@ const newMsg = (e: Event) => {
         message: text.value,
         _id: session.value?.id,
         option: "message",
+        status: "sent",
       },
       ID,
-      (response: any) => {
-        console.log(response);
+      (response: string) => {
+        console.log(response)
+        if (response === "success") {
+          messages.value.map((msg) => {
+            if (msg.status === "not sent") msg.status = "sent";
+            return msg;
+          });
+        }
       }
     );
 
@@ -406,6 +439,7 @@ const file = (e: Event) => {
           message: images.value,
           _id: session.value?.id,
           option: "image",
+          status: "not sent",
         });
 
         // send to backend for other users
@@ -416,10 +450,16 @@ const file = (e: Event) => {
             message: images.value,
             _id: session.value?.id,
             option: "image",
+            status: "sent",
           },
           ID,
-          (response: any) => {
-            console.log(response);
+          (response: string) => {
+            if (response === "success") {
+              messages.value.map((msg) => {
+                if (msg.status === "not sent") msg.status = "sent";
+                return msg;
+              });
+            }
           }
         );
 
@@ -517,6 +557,7 @@ socket.on("users", (user, users) => {
     name: user.name,
     _id: user.id,
     message: `${user.name} connected`,
+    status: "sent",
   };
 
   // notify group users in a room of connected user
@@ -538,8 +579,7 @@ socket.on("users", (user, users) => {
 // send the room id to backend
 socket.emit("join-room", ID);
 
-socket.on("chat message", (msg) => {
-  // get new message from user and push to message body and scroll to last div
+socket.on("chat message", (msg) => {  // get new message from user and push to message body and scroll to last div
   messages.value?.push(msg);
   ScrollToBottom();
 });
@@ -551,6 +591,7 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
     name: offlineUser.name,
     _id: offlineUser.id,
     message: `${offlineUser.name} disconnected`,
+    status: "sent",
   };
 
   // notify group users of disconnected user
