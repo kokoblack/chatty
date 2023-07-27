@@ -116,6 +116,7 @@ app
         ).toString(CryptoJS.enc.Utf8),
         _id: msg._id,
         option: msg.option,
+        status: msg.status
       };
     });
     res.send(conversation);
@@ -213,6 +214,7 @@ io.on("connection", (socket) => {
         message: encryptedMessage,
         _id: msg._id,
         option: msg.option,
+        status: msg.status
       };
 
       await Room.updateOne(
