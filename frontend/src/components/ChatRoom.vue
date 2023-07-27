@@ -17,6 +17,7 @@
         scale="1.2"
       ></v-icon>
     </div>
+    
     <div @click="closeMenu" class="chat_room-body" id="scroll-to-bottom">
       <Error v-show="imageValidation" :message="imageValidation" />
       <form class="hidden" id="form">
@@ -28,6 +29,9 @@
           name="images"
         />
       </form>
+      <div v-show="loader" class="loader">
+        <Loading />
+      </div>
       <template v-if="session?.routeName === 'private'" v-for="msg in messages">
         <div
           v-show="msg.option === 'message'"
@@ -40,13 +44,13 @@
             v-show="session?.id === msg._id && msg.status === 'sent'"
             class="status-icon"
             name="io-checkmark-done-circle"
-            scale=".9"
+            scale=".8"
           ></v-icon>
           <v-icon
             v-show="session?.id === msg._id && msg.status === 'not sent'"
             class="status-icon"
             name="io-time-sharp"
-            scale=".9"
+            scale=".8"
           ></v-icon>
         </div>
         <div
@@ -58,13 +62,13 @@
             v-show="session?.id === msg._id && msg.status === 'sent'"
             class="status-icon"
             name="io-checkmark-done-circle"
-            scale=".9"
+            scale=".8"
           ></v-icon>
           <v-icon
             v-show="session?.id === msg._id && msg.status === 'not sent'"
             class="status-icon"
             name="io-time-sharp"
-            scale=".9"
+            scale=".8"
           ></v-icon>
         </div>
       </template>
@@ -83,13 +87,13 @@
             v-show="session?.id === msg._id && msg.status === 'sent'"
             class="status-icon"
             name="io-checkmark-done-circle"
-            scale=".9"
+            scale=".8"
           ></v-icon>
           <v-icon
             v-show="session?.id === msg._id && msg.status === 'not sent'"
             class="status-icon"
             name="io-time-sharp"
-            scale=".9"
+            scale=".8"
           ></v-icon>
         </div>
         <div
@@ -102,13 +106,13 @@
             v-show="session?.id === msg._id && msg.status === 'sent'"
             class="status-icon"
             name="io-checkmark-done-circle"
-            scale=".9"
+            scale=".8"
           ></v-icon>
           <v-icon
             v-show="session?.id === msg._id && msg.status === 'not sent'"
             class="status-icon"
             name="io-time-sharp"
-            scale=".9"
+            scale=".8"
           ></v-icon>
         </div>
       </template>
@@ -202,6 +206,7 @@ import { VuemojiPicker, EmojiClickEventDetail } from "vuemoji-picker";
 import { copyTextToClipboard } from "../components/CopyTextToClipboard";
 import axios from "axios";
 import Error from "../components/Error.vue";
+import Loading from "../components/Loader.vue";
 
 type Message = {
   name: string;
@@ -221,21 +226,22 @@ const store = useCounterStore();
 const { name, routeOption, roomID, id, admin, routeName } = storeToRefs(store);
 const messages = ref<Message>([]);
 const users = ref<string[]>([]);
-const images = ref("");
-const imageValidation = ref("");
-const showImgInFull = ref(false);
-const displayImg = ref("");
 const privateStatus = ref("Waiting for other user");
 const groupStatus = ref("Waiting for other users");
+const checkCopied = ref("Copy chat ID");
 const refs = ref();
+const loader = ref(false);
+const showImgInFull = ref(false);
 const menu = ref(false);
 const userMenu = ref(false);
 const chatIDMenu = ref(false);
-const checkCopied = ref("Copy chat ID");
 const emojiMenu = ref(false);
 const height = ref("");
 const text = ref("");
 const checkRoom = ref("");
+const images = ref("");
+const imageValidation = ref("");
+const displayImg = ref("");
 const screenWidth = ref(window.innerWidth);
 const navigate = useRouter();
 const route = useRoute();
@@ -363,7 +369,7 @@ const newMsg = (e: Event) => {
       },
       ID,
       (response: string) => {
-        console.log(response)
+        console.log(response);
         if (response === "success") {
           messages.value.map((msg) => {
             if (msg.status === "not sent") msg.status = "sent";
@@ -479,23 +485,40 @@ const openFile = () => {
   document.getElementById("input-file")?.click();
 };
 
-// check if room still exist in database
-axios
-  .get(`https://chatty-api-service.onrender.com/rooms/${ID}`)
-  .then((res) => {
-    if (!res.data) {
-      checkRoom.value = "Session expired";
-    }
-  })
-  .catch((err) => console.log(err));
+const getConversations = () => {
+  loader.value = true;
 
-// get all conversaton of a particular room when a user refresh or disconnect
-axios
-  .get(`https://chatty-api-service.onrender.com/rooms/conversation/${ID}`)
-  .then((res) => {
-    messages.value = res.data;
-  })
-  .catch((err) => console.log(err));
+  if (messages.value) loader.value = false;
+
+  // get all conversaton of a particular room when a user refresh or disconnect
+  axios
+    .get(`https://chatty-api-service.onrender.com/rooms/conversation/${ID}`)
+    .then((res) => {
+      loader.value = false;
+      messages.value = res.data;
+      console.log(res.data);
+    })
+    .catch((err) => {
+      loader.value = false;
+      console.log(err);
+    });
+};
+
+getConversations();
+
+const checkIfRoomExist = () => {
+  // check if room still exist in database
+  axios
+    .get(`https://chatty-api-service.onrender.com/rooms/${ID}`)
+    .then((res) => {
+      if (!res.data) {
+        checkRoom.value = "Session expired";
+      }
+    })
+    .catch((err) => console.log(err));
+};
+
+checkIfRoomExist();
 
 onMounted(() => {
   window.addEventListener("resize", handleResize);
@@ -579,7 +602,8 @@ socket.on("users", (user, users) => {
 // send the room id to backend
 socket.emit("join-room", ID);
 
-socket.on("chat message", (msg) => {  // get new message from user and push to message body and scroll to last div
+socket.on("chat message", (msg) => {
+  // get new message from user and push to message body and scroll to last div
   messages.value?.push(msg);
   ScrollToBottom();
 });
@@ -665,7 +689,12 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
       }
     }
 
-    // .chat-container {}
+    .loader {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
 
     .img-error {
       display: block;
