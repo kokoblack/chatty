@@ -17,7 +17,7 @@
         scale="1.2"
       ></v-icon>
     </div>
-    
+
     <div @click="closeMenu" class="chat_room-body" id="scroll-to-bottom">
       <Error v-show="imageValidation" :message="imageValidation" />
       <form class="hidden" id="form">
@@ -207,6 +207,7 @@ import { copyTextToClipboard } from "../components/CopyTextToClipboard";
 import axios from "axios";
 import Error from "../components/Error.vue";
 import Loading from "../components/Loader.vue";
+import { v4 as uuidv4 } from "uuid";
 
 type Message = {
   name: string;
@@ -214,6 +215,7 @@ type Message = {
   option: string;
   _id: string;
   status: string;
+  chatID: string;
 }[];
 
 axios.defaults.withCredentials = true;
@@ -348,34 +350,37 @@ const newMsg = (e: Event) => {
   e.preventDefault();
 
   if (text.value) {
-    // if the user input isn't empty then push the message to message body
-    messages.value?.push({
+    const input = {
       name: session.value?.name,
       message: text.value,
       _id: session.value?.id,
+      chatID: uuidv4(),
       option: "message",
       status: "not sent",
-    });
+    };
+    // if the user input isn't empty then push the message to message body
+    messages.value?.push(input);
 
     // this send the message to backend to other users
     socket.emit(
       "chat message",
-      {
-        name: session.value?.name,
-        message: text.value,
-        _id: session.value?.id,
-        option: "message",
-        status: "sent",
-      },
+      input,
       ID,
-      (response: string) => {
+      (response: { status: string; id: string }) => {
         console.log(response);
-        if (response === "success") {
-          messages.value.map((msg) => {
-            if (msg.status === "not sent") msg.status = "sent";
-            return msg;
-          });
+        if (response.status === "success") {
+          const index = messages.value.findIndex(
+            (msg) => msg.chatID === response.id
+          );
+          messages.value[index].status = "sent";
         }
+
+        // if (response.status === "success") {
+        //   messages.value.map((msg) => {
+        //     if (msg.chatID === "not sent") msg.status = "sent";
+        //     return msg;
+        //   });
+        // }
       }
     );
 
@@ -439,33 +444,38 @@ const file = (e: Event) => {
       reader.onload = () => {
         images.value = reader.result! as string;
 
-        // push the converted image to the message body
-        messages.value?.push({
+        const input = {
           name: session.value?.name,
           message: images.value,
           _id: session.value?.id,
+          chatID: uuidv4(),
           option: "image",
           status: "not sent",
-        });
+        };
+
+        // push the converted image to the message body
+        messages.value?.push(input);
 
         // send to backend for other users
         socket.emit(
           "chat message",
-          {
-            name: session.value?.name,
-            message: images.value,
-            _id: session.value?.id,
-            option: "image",
-            status: "sent",
-          },
+          input,
           ID,
-          (response: string) => {
-            if (response === "success") {
-              messages.value.map((msg) => {
-                if (msg.status === "not sent") msg.status = "sent";
-                return msg;
-              });
+          (response: { status: string; id: string }) => {
+            console.log(response);
+            if (response.status === "success") {
+              const index = messages.value.findIndex(
+                (msg) => msg.chatID === response.id
+              );
+              messages.value[index].status = "sent";
             }
+
+            // if (response.status === "success") {
+            //   messages.value.map((msg) => {
+            //     if (msg.chatID === "not sent") msg.status = "sent";
+            //     return msg;
+            //   });
+            // }
           }
         );
 
@@ -581,6 +591,7 @@ socket.on("users", (user, users) => {
     _id: user.id,
     message: `${user.name} connected`,
     status: "sent",
+    chatID: uuidv4(),
   };
 
   // notify group users in a room of connected user
@@ -616,6 +627,7 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
     _id: offlineUser.id,
     message: `${offlineUser.name} disconnected`,
     status: "sent",
+    chatID: uuidv4(),
   };
 
   // notify group users of disconnected user

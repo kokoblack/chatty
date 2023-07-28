@@ -17,7 +17,7 @@ const io = new Server(server, {
   },
   allowEIO3: true,
   maxHttpBufferSize: 1e8,
-  pingTimeout: 60000
+  pingTimeout: 60000,
 });
 
 app.use(bodyParser.json());
@@ -50,16 +50,17 @@ const chattySchema = new mongoose.Schema({
       message: String,
       _id: String,
       option: String,
-      status: String
+      status: String,
+      chatID: String,
     },
   ],
 });
 
 const Room = mongoose.model("Room", chattySchema);
 
-app.route("/").get((req,res) => {
-  res.send("server is working")
-})
+app.route("/").get((req, res) => {
+  res.send("server is working");
+});
 
 app.route("/rooms").post(async (req, res) => {
   const room = new Room(req.body);
@@ -116,7 +117,8 @@ app
         ).toString(CryptoJS.enc.Utf8),
         _id: msg._id,
         option: msg.option,
-        status: msg.status
+        status: msg.status,
+        chatID: msg.chatID,
       };
     });
     res.send(conversation);
@@ -200,9 +202,21 @@ io.on("connection", (socket) => {
 
     .on("join-room", (room) => socket.join(room))
     .on("chat message", async (msg, room, callback) => {
-      callback("success");
+      callback({
+        status: "success",
+        id: msg.chatID,
+      });
 
-      socket.to(room).emit("chat message", msg);
+      const message1 = {
+        name: msg.name,
+        message: msg.message,
+        _id: msg._id,
+        option: msg.option,
+        status: "sent",
+        chatID: msg.chatID,
+      };
+
+      socket.to(room).emit("chat message", message1);
 
       const encryptedMessage = CryptoJS.AES.encrypt(
         msg.message,
@@ -214,7 +228,8 @@ io.on("connection", (socket) => {
         message: encryptedMessage,
         _id: msg._id,
         option: msg.option,
-        status: msg.status
+        status: "sent",
+        chatID: msg.chatID,
       };
 
       await Room.updateOne(
