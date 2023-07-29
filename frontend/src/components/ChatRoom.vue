@@ -208,7 +208,6 @@ import { copyTextToClipboard } from "../components/CopyTextToClipboard";
 import axios from "axios";
 import Error from "../components/Error.vue";
 import Loading from "../components/Loader.vue";
-import Textarea from "../components/Textarea.vue";
 import { v4 as uuidv4 } from "uuid";
 
 type Message = {

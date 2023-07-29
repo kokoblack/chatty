@@ -81,7 +81,6 @@
 import "../styles/global.scss";
 import Error from "../components/Error.vue";
 import { ref, onMounted, onUnmounted } from "vue";
-import Textarea from "../components/Textarea.vue";
 import { useRouter } from "vue-router";
 import { VuemojiPicker, EmojiClickEventDetail } from "vuemoji-picker";
 import axios from "axios";
