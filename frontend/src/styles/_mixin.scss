@@ -17,7 +17,7 @@
 	width: $width;
 	max-width: 70%;
 	box-sizing: border-box;
-	word-break: break-all;
+	word-break: break-word;
 	white-space: pre-line;
 }
 
@@ -77,4 +77,131 @@
 	.status-icon {
 		@include status-icon;
 	}
+}
+
+@mixin style1 {
+	padding: 0.4rem;
+	margin: 0.2rem auto 0 0;
+	background-color: #dedfe0;
+	color: #19191a;
+	@include chat-style(fit-content);
+
+	& p {
+		margin: 0;
+	}
+}
+
+@mixin style2 {
+	padding: 0.4rem 2rem 0.4rem 0.4rem;
+	margin: 0.2rem 0 0 auto;
+	background-color: #041562;
+	color: white;
+	@include chat-style(fit-content);
+
+	& p {
+		margin: 0;
+	}
+}
+
+@mixin menu {
+	position: fixed;
+	border-radius: 6px;
+	background-color: #071d7c;
+	color: white;
+	padding: 0 1.2rem;
+	top: 3.5rem;
+	right: 1rem;
+}
+
+@mixin emoji {
+	width: 100%;
+	max-width: 992px;
+	position: fixed;
+	bottom: 3.6rem;
+}
+
+@mixin textarea {
+	@include flex-center;
+	padding: 0.4rem 0.3rem 0 0.3rem;
+	border-radius: 6px;
+	border: none;
+	font-size: 1rem;
+	height: 35px;
+	width: 90%;
+	border: 1px solid #e0e3e7;
+	resize: none;
+	box-sizing: border-box;
+
+	&:focus {
+		outline: none;
+	}
+
+	&::placeholder {
+		font-family: "DM Sans", sans-serif;
+		font-size: 0.8rem;
+		padding-top: 0.1rem;
+	}
+}
+
+@mixin room-container {
+	display: block;
+	min-height: 100vh;
+	position: relative;
+	box-sizing: border-box;
+}
+
+@mixin room-header {
+	@include flex-center;
+	background-color: #041562;
+	color: white;
+	width: 100%;
+	position: sticky;
+	top: 0;
+	padding: 1rem;
+	box-sizing: border-box;
+	z-index: 10;
+
+	p {
+		font-size: 1rem;
+		margin: 0 auto 0 0;
+	}
+
+	.icon {
+		margin: 0;
+	}
+}
+
+@mixin room-body {
+	padding: 0 0.2rem;
+	width: 100%;
+	box-sizing: border-box;
+	position: relative;
+}
+
+@mixin room-body_last-child {
+	height: 20.5rem;
+
+	@media screen and (max-width: 480px) {
+		height: 12.5rem;
+	}
+}
+
+@mixin room-body_loader {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+@mixin room-footer {
+	@include flex-center;
+	background-color: white;
+	color: #333436;
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+	padding: 0.7rem;
+	max-width: 992px;
+	box-sizing: border-box;
+	border-top: 1px solid #e0e3e7;
 }

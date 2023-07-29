@@ -19,7 +19,7 @@
     </div>
 
     <div @click="closeMenu" class="chat_room-body" id="scroll-to-bottom">
-      <Error v-show="imageValidation" :message="imageValidation" />
+      <Error v-show="imageValidation" :message="imageValidation" class="z-index"/>
       <form class="hidden" id="form">
         <input
           id="input-file"
@@ -136,6 +136,7 @@
         scale="1.1"
       ></v-icon>
       <v-icon @click="openFile" class="margin" name="bi-image-fill"></v-icon>
+      <!-- <Textarea :text="text"/> -->
       <textarea
         v-model="text"
         class="margin"
@@ -163,8 +164,8 @@
     </div>
 
     <VuemojiPicker
+      v-show="emojiMenu"
       :is-dark="false"
-      v-if="emojiMenu"
       @emojiClick="handleEmojiClick"
       class="emoji"
       :picker-style="
@@ -198,7 +199,7 @@
 
 <script setup lang="ts">
 import io from "socket.io-client";
-import { ref, onMounted, onUnmounted, onBeforeUnmount } from "vue";
+import { ref, onBeforeUnmount, onMounted, onUnmounted } from "vue";
 import { useCounterStore } from "../stores/UserStore";
 import { storeToRefs } from "pinia";
 import { useRouter, useRoute } from "vue-router";
@@ -207,6 +208,7 @@ import { copyTextToClipboard } from "../components/CopyTextToClipboard";
 import axios from "axios";
 import Error from "../components/Error.vue";
 import Loading from "../components/Loader.vue";
+import Textarea from "../components/Textarea.vue";
 import { v4 as uuidv4 } from "uuid";
 
 type Message = {
@@ -231,20 +233,20 @@ const users = ref<string[]>([]);
 const privateStatus = ref("Waiting for other user");
 const groupStatus = ref("Waiting for other users");
 const checkCopied = ref("Copy chat ID");
-const refs = ref();
+const screenWidth = ref(window.innerWidth);
 const loader = ref(false);
 const showImgInFull = ref(false);
 const menu = ref(false);
 const userMenu = ref(false);
 const chatIDMenu = ref(false);
 const emojiMenu = ref(false);
+const refs = ref();
 const height = ref("");
 const text = ref("");
 const checkRoom = ref("");
 const images = ref("");
 const imageValidation = ref("");
 const displayImg = ref("");
-const screenWidth = ref(window.innerWidth);
 const navigate = useRouter();
 const route = useRoute();
 const ID = route.params.room;
@@ -256,7 +258,6 @@ const session = ref({
   admin: admin.value,
   routeName: routeName.value,
 });
-
 const emojiStyle = {
   width: "100%",
   categoryEmojiSize: "1.2rem",
@@ -285,6 +286,14 @@ session.value?.routeOption === "create"
   ? (chatIDMenu.value = true)
   : (chatIDMenu.value = false);
 
+const resize = () => {
+  // resize the textarea when a user types a message
+  refs.value.style.height = "35px";
+  refs.value.style.height = refs.value.scrollHeight + "px";
+  refs.value.style.maxHeight = "79px";
+  height.value = refs.value.scrollHeight + "px";
+};
+
 const showImg = (src: string) => {
   // display image sent or recieved in full screen
   displayImg.value = src;
@@ -295,19 +304,6 @@ const closeImg = () => {
   // close image from full screen
   displayImg.value = "";
   showImgInFull.value = false;
-};
-
-const handleResize = () => {
-  // resize the screen width of user for the emoji to fit
-  screenWidth.value = window.innerWidth;
-};
-
-const resize = () => {
-  // resize the textarea when a user types a message
-  refs.value.style.height = "35px";
-  refs.value.style.height = refs.value.scrollHeight + "px";
-  refs.value.style.maxHeight = "79px";
-  height.value = refs.value.scrollHeight + "px";
 };
 
 const handleEmojiClick = (details: EmojiClickEventDetail) => {
@@ -374,13 +370,6 @@ const newMsg = (e: Event) => {
           );
           messages.value[index].status = "sent";
         }
-
-        // if (response.status === "success") {
-        //   messages.value.map((msg) => {
-        //     if (msg.chatID === "not sent") msg.status = "sent";
-        //     return msg;
-        //   });
-        // }
       }
     );
 
@@ -469,13 +458,6 @@ const file = (e: Event) => {
               );
               messages.value[index].status = "sent";
             }
-
-            // if (response.status === "success") {
-            //   messages.value.map((msg) => {
-            //     if (msg.chatID === "not sent") msg.status = "sent";
-            //     return msg;
-            //   });
-            // }
           }
         );
 
@@ -526,6 +508,11 @@ const checkIfRoomExist = () => {
       }
     })
     .catch((err) => console.log(err));
+};
+
+const handleResize = () => {
+  // resize the screen width of user for the emoji to fit
+  screenWidth.value = window.innerWidth;
 };
 
 checkIfRoomExist();
@@ -661,51 +648,25 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
 @use "../styles/mixin" as s;
 
 .chat_room-container {
-  display: block;
-  min-height: 100vh;
-  position: relative;
-  box-sizing: border-box;
+  @include s.room-container;
 
   .chat_room-header {
-    @include s.flex-center;
-    background-color: #041562;
-    color: white;
-    width: 100%;
-    position: sticky;
-    top: 0;
-    padding: 1rem;
-    box-sizing: border-box;
-    z-index: 10;
-
-    p {
-      font-size: 1rem;
-      margin: 0 auto 0 0;
-    }
-
-    .icon {
-      margin: 0;
-    }
+    @include s.room-header;
   }
 
   .chat_room-body {
-    padding: 0 0.2rem;
-    width: 100%;
-    box-sizing: border-box;
-    position: relative;
+    @include s.room-body;
 
     .last-child {
-      height: 20.5rem;
-
-      @media screen and (max-width: 480px) {
-        height: 12.5rem;
-      }
+      @include s.room-body_last-child;
     }
 
     .loader {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      @include s.room-body_loader;
+    }
+
+    .z-index{
+      z-index: 50;
     }
 
     .img-error {
@@ -729,30 +690,14 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
     }
 
     .style1 {
-      padding: 0.5rem;
-      margin: 0.2rem auto 0 0;
-      background-color: #dedfe0;
-      color: #19191a;
-      @include s.chat-style(fit-content);
-
-      & p {
-        margin: 0;
-      }
+      @include s.style1;
     }
 
     .style2 {
-      padding: 0.4rem 2rem 0.4rem 0.4rem;
-      margin: 0.2rem 0 0 auto;
-      background-color: #041562;
-      color: white;
-      @include s.chat-style(fit-content);
+      @include s.style2;
 
       .status-icon {
         @include s.status-icon;
-      }
-
-      & p {
-        margin: 0;
       }
     }
 
@@ -857,46 +802,18 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
   }
 
   .chat_room-footer {
-    @include s.flex-center;
-    background-color: white;
-    color: #333436;
-    width: 100%;
-    position: fixed;
-    bottom: 0;
-    padding: 0.7rem;
-    max-width: 992px;
-    box-sizing: border-box;
-    border-top: 1px solid #e0e3e7;
+    @include s.room-footer;
 
     .emoji-color {
       color: #071d7c;
     }
 
     textarea {
-      @include s.flex-center;
-      padding: 0.4rem 0.3rem 0 0.3rem;
-      border-radius: 6px;
-      border: none;
-      font-size: 1rem;
-      height: 35px;
-      width: 90%;
-      border: 1px solid #e0e3e7;
-      resize: none;
-      box-sizing: border-box;
-
-      &:focus {
-        outline: none;
-      }
-
-      &::placeholder {
-        font-family: "DM Sans", sans-serif;
-        font-size: 0.8rem;
-        padding-top: 0.1rem;
-      }
+      @include s.textarea;
     }
 
     .scrollbar::-webkit-scrollbar {
-      width: 5px;
+      width: 3px;
     }
 
     .no-scrollbar::-webkit-scrollbar {
@@ -957,13 +874,11 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
   }
 
   .menu {
-    position: fixed;
-    border-radius: 6px;
-    background-color: #071d7c;
-    color: white;
-    padding: 0 1.2rem;
-    top: 3.5rem;
-    right: 1rem;
+    @include s.menu;
+  }
+
+  .emoji {
+    @include s.emoji;
   }
 
   .user-menu {
@@ -992,13 +907,6 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
 
   .user-menu::-webkit-scrollbar-thumb {
     background-color: #333436; /* color of the scroll thumb */
-  }
-
-  .emoji {
-    width: 100%;
-    max-width: 992px;
-    position: fixed;
-    bottom: 3.6rem;
   }
 
   .cursor-pointer {

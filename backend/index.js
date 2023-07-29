@@ -12,7 +12,7 @@ const server = http.createServer(app);
 const newUser = {};
 const io = new Server(server, {
   cors: {
-    origin: "https://chatty-henna-nine.vercel.app",
+    origin: "hhttps://chatty-henna-nine.vercel.app",
     credentials: true,
   },
   allowEIO3: true,
@@ -31,7 +31,7 @@ app.use(
   })
 );
 
-mongoose.connect(process.env.MONGODB_URL);
+mongoose.connect("mongodb://127.0.0.1:27017/chattyDB");
 
 const chattySchema = new mongoose.Schema({
   _id: String,
