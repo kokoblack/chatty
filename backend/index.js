@@ -31,7 +31,7 @@ app.use(
   })
 );
 
-mongoose.connect("mongodb://127.0.0.1:27017/chattyDB");
+mongoose.connect(process.env.MONGODB_URL);
 
 const chattySchema = new mongoose.Schema({
   _id: String,
