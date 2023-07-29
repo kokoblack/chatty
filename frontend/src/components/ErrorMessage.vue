@@ -30,7 +30,7 @@ const buttonClick = (close: boolean) => {
 	width: 100vw;
 	position: relative;
 	backdrop-filter: blur(4px) brightness(50%);
-	z-index: 10;
+	z-index: 50;
 
 	.error_message {
 		background-color: #fff;
