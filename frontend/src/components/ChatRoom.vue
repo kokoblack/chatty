@@ -74,7 +74,7 @@
       </template>
 
       <template v-if="session?.routeName === 'group'" v-for="msg in messages">
-        <p v-if="msg.option === 'connection'" class="connection">
+        <p v-if="msg.option === 'connection' && session.id !== msg._id" class="connection">
           {{ msg.message }}
         </p>
         <div
@@ -219,7 +219,7 @@ type Message = {
   chatID: string;
 }[];
 
-axios.defaults.withCredentials = true;
+// axios.defaults.withCredentials = true;
 
 const socket = io("https://chatty-api-service.onrender.com", {
   withCredentials: true,
@@ -355,6 +355,7 @@ const newMsg = (e: Event) => {
     };
     // if the user input isn't empty then push the message to message body
     messages.value?.push(input);
+    emojiMenu.value = false
 
     // this send the message to backend to other users
     socket.emit(

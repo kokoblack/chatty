@@ -11,7 +11,7 @@
     </div>
 
     <div @click="closeMenu" class="ai_room-body" id="scroll-to-bottom">
-      <Error v-show="errorMsg" :message="errorMsg" class="z-index"/>
+      <Error v-show="errorMsg" :message="errorMsg" class="z-index" />
       <div
         v-for="msg in messages"
         :class="'human' === msg._id ? 'style2' : 'style1'"
@@ -19,20 +19,8 @@
         <p>
           {{ msg.message }}
         </p>
-        <!-- <v-icon
-          v-show="session?.id === msg._id && msg.status === 'sent'"
-          class="status-icon"
-          name="io-checkmark-done-circle"
-          scale=".8"
-        ></v-icon>
-        <v-icon
-          v-show="session?.id === msg._id && msg.status === 'not sent'"
-          class="status-icon"
-          name="io-time-sharp"
-          scale=".8"
-        ></v-icon> -->
       </div>
-
+      <div v-show="loader" class="msg-loader"><MsgLoader /></div>
       <div class="last-child" id="last-child"></div>
     </div>
 
@@ -44,8 +32,9 @@
         name="bi-emoji-smile"
         scale="1.1"
       ></v-icon>
-      <!-- <Textarea :text="text" /> -->
+
       <textarea
+        @focus="errShow = false"
         v-model="text"
         class="margin"
         :class="height === '103px' ? 'scrollbar' : 'no-scrollbar'"
@@ -53,12 +42,15 @@
         ref="refs"
         @input="resize()"
       ></textarea>
+
       <v-icon
+        v-show="!loader"
         @click="newMsg"
         class="send margin"
         name="io-send-sharp"
         scale="1.1"
       ></v-icon>
+      <div v-show="loader" class="send-loader"><SendLoader /></div>
     </div>
 
     <div v-if="menu" class="menu">
@@ -74,6 +66,10 @@
         screenWidth < 360 ? emojiStyle : { width: '100%', height: '16rem' }
       "
     />
+
+    <div @click="resendMsg" v-show="errShow" class="resend">
+      <button>Resend message</button>
+    </div>
   </div>
 </template>
 
@@ -84,6 +80,8 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { VuemojiPicker, EmojiClickEventDetail } from "vuemoji-picker";
 import axios from "axios";
+import MsgLoader from "../components/MessageLoader.vue";
+import SendLoader from "../components/SendLoader.vue";
 
 type Message = {
   message: string;
@@ -93,8 +91,9 @@ type Message = {
 // axios.defaults.withCredentials = true;
 
 const menu = ref(false);
-// const loader = ref(false);
+const loader = ref(false);
 const emojiMenu = ref(false);
+const errShow = ref(false);
 const refs = ref();
 const height = ref("");
 const text = ref("");
@@ -171,7 +170,8 @@ const newMsg = (e: Event) => {
     ScrollToBottom();
     sessionStorage.setItem("ai", JSON.stringify(messages.value));
 
-    // loader.value = true;
+    loader.value = true;
+    emojiMenu.value = false
 
     axios
       .post(
@@ -185,11 +185,12 @@ const newMsg = (e: Event) => {
           headers: {
             "Content-Type": "application/json",
           },
+          timeout: 15000,
         }
       )
       .then((req) => {
         console.log(req);
-        // loader.value = false;
+        loader.value = false;
         messages.value.push({
           message: req.data.message,
           _id: "bot",
@@ -199,7 +200,8 @@ const newMsg = (e: Event) => {
       })
       .catch((err) => {
         console.log(err);
-        // loader.value = false;
+        loader.value = false;
+        errShow.value = true;
         errorMsg.value = "something went wrong. Please try again";
 
         setTimeout(() => {
@@ -209,6 +211,47 @@ const newMsg = (e: Event) => {
 
     text.value = "";
   }
+};
+
+const resendMsg = () => {
+  loader.value = true;
+  errShow.value = false;
+
+  axios
+    .post(
+      "https://www.botlibre.com/rest/json/chat",
+      {
+        application: "3092550274072837282",
+        instance: "165",
+        message: messages.value[messages.value.length - 1].message,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        timeout: 15000,
+      }
+    )
+    .then((req) => {
+      console.log(req);
+      loader.value = false;
+      messages.value.push({
+        message: req.data.message,
+        _id: "bot",
+      });
+      ScrollToBottom();
+      sessionStorage.setItem("ai", JSON.stringify(messages.value));
+    })
+    .catch((err) => {
+      console.log(err);
+      loader.value = false;
+      errShow.value = true;
+      errorMsg.value = "something went wrong. Please try again";
+
+      setTimeout(() => {
+        errorMsg.value = "";
+      }, 3000);
+    });
 };
 
 onMounted(() => {
@@ -237,11 +280,23 @@ onUnmounted(() => {
       @include s.room-body_last-child;
     }
 
+    .msg-loader {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      margin-top: 0.2rem;
+      background-color: #dedfe0;
+      padding: 0.4rem 0;
+      border-radius: 6px;
+      width: 45px;
+    }
+
     .loader {
       @include s.room-body_loader;
     }
 
-    .z-index{
+    .z-index {
       z-index: 50;
     }
 
@@ -283,6 +338,11 @@ onUnmounted(() => {
       border-radius: 20px; /* roundness of the scroll thumb */
     }
 
+    .send-loader {
+      width: 40px;
+      @include s.flex-center;
+    }
+
     .margin {
       margin: 0 0.5rem;
 
@@ -299,6 +359,29 @@ onUnmounted(() => {
 
   .emoji {
     @include s.emoji;
+  }
+
+  .resend {
+    position: fixed;
+    bottom: 3rem;
+    left: 50%;
+    width: fit-content;
+    transform: translate(-50%, -50%);
+
+    & button {
+      font-family: "DM Sans", sans-serif;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: none;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      border: 1px solid #e0e3e7;
+      box-shadow: 2px 2px 4px #eaedf1;
+
+      @media screen and (max-width: 305px) {
+        font-size: .8rem;
+      }
+    }
   }
 }
 </style>
