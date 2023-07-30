@@ -12,7 +12,7 @@ const server = http.createServer(app);
 const newUser = {};
 const io = new Server(server, {
   cors: {
-    origin: "hhttps://chatty-henna-nine.vercel.app",
+    origin: "https://chatty-henna-nine.vercel.app",
     credentials: true,
   },
   allowEIO3: true,
@@ -25,9 +25,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // app.use(cors())
 app.use(
   cors({
-    origin: ["https://chatty-henna-nine.vercel.app"],
+    origin: "*",
     methods: ["POST", "GET", "PATCH", "DELETE", "OPTIONS", "PUT"],
-    credentials: true,
+    // credentials: true,
   })
 );
 

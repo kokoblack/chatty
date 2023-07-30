@@ -60,7 +60,7 @@ import ErrorMessage from "../components/ErrorMessage.vue";
 import Error from "../components/Error.vue";
 import Loading from "../components/Loading.vue";
 
-axios.defaults.withCredentials = true;
+// axios.defaults.withCredentials = true;
 
 const store = useCounterStore();
 const { setName, setRoomID, setRouteOption, setRouteName, setId, setAdmin } =
