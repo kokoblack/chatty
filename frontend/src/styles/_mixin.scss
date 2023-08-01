@@ -111,6 +111,10 @@
 	padding: 0 1.2rem;
 	top: 3.5rem;
 	right: 1rem;
+
+	@media screen and (min-width: 993px) {
+		right: 12.5rem;
+	}
 }
 
 @mixin emoji {
@@ -148,6 +152,7 @@
 	min-height: 100vh;
 	position: relative;
 	box-sizing: border-box;
+	max-width: 992px;
 }
 
 @mixin room-header {

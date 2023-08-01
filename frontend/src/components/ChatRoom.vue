@@ -869,8 +869,12 @@ socket.on("offline", (user, offlineUsers, offlineUser) => {
     }
 
     @media screen and (max-width: 480px) {
-      width: 13rem;
+      width: 13rem;    }
+
+    @media screen and (min-width: 993px) {
+      left: 13rem;
     }
+
   }
 
   .menu {
